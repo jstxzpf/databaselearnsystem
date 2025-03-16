@@ -1,0 +1,82 @@
+# 函数依赖的投影算法详解
+
+在关系型数据库理论中，**函数依赖（Functional Dependency, FD）** 描述了一种属性间的关系：给定一组值时可以唯一确定另一组值。例如，在一个学生表里，每个学生的学号（student_id）能唯一地决定其姓名（name），即存在函数依赖 student_id → name。
+
+## 定义和原理
+
+### 1. 函数依赖的定义
+- **X→Y**: 如果对于关系模式 R 中的所有元组 t 和 t'，当 t[X] = t'[X] 则必有 t[Y] = t'[Y]，则称 X → Y。
+  
+### 2. 投影算法的作用
+投影算法用于从给定的函数依赖集中推导出所有隐含的函数依赖。这是因为原始的函数依赖集合可能不包含所有显而易见的依赖关系（比如传递性、伪传递性和分解规则）。通过应用这些法则，可以得到更完整的函数依赖集合。
+
+### 3. 函数依赖集闭包
+- **F+**: 对于给定的关系模式 R 和函数依赖集 F，F 的闭包 F+ 是由所有可以通过算法推导出的函数依赖组成的集合。
+
+## 算法原理
+
+投影算法主要包括以下三个法则：
+1. **自反性法则**：如果 X ⊆ Y，则有 X → Y。
+2. **增广法则**：如果 X → Y 且 Z ⊆ R，则 XZ → YZ 成立。
+3. **传递性法则**（Armstrong 公理的传递性）：如果 X → Y 和 Y → Z，那么 X → Z。
+
+### 示例
+考虑一个学生表，假设存在以下函数依赖：
+- student_id → name, course_id → class_name
+
+我们可以利用投影算法推导出更多的依赖关系，例如 student_id → class_name（通过传递性法则）。
+
+## 实际应用场景和示例
+
+假设有如下关系模式 R(A,B,C,D) 和函数依赖集 F = {A → B, A → C, B → D}。我们想要确定这些FD的闭包。
+
+### 应用投影算法
+1. 使用自反性法则，从已知的 FD 推导出所有显而易见的新 FD。
+2. 应用传递性法则推导新的依赖关系。
+
+#### 操作步骤
+
+```mermaid
+graph TD
+    A[开始] --> B{A→B, A→C, B→D?}
+    B -->|是| C[A→D]
+    B -->|否| D[结束]
+```
+
+通过算法，我们得出：由于 A → B 且 B → D，则有 A → D。同理可以推导出更多。
+
+## 相关SQL代码或实现方法
+
+虽然SQL本身不支持直接计算FD的闭包或者投影算法的自动化执行，但是可以通过编写程序（如Python脚本）来模拟这些逻辑，并与数据库进行交互以验证结果。例如：
+
+```python
+def armstrong_rules(fd):
+    # fd 是一个包含函数依赖字典形式的数据结构，例如 {'A': ['B', 'C'], 'B': ['D']}
+    
+    new_fds = fd.copy()
+    while True:
+        old_size = len(new_fds)
+        
+        for x, y in list(new_fds.items()):
+            for z in y:
+                # 自反性法则
+                if set(z) - set(x):
+                    new_fds.setdefault(frozenset(set(x)), set()).update([frozenset(set(y))]
+            
+                # 传递性法则
+                for other_x, other_y in list(new_fds.items()):
+                    if z in other_x:
+                        for w in other_y:
+                            if frozenset(set(x)) != frozenset(set(w)):
+                                new_fds.setdefault(frozenset(set(x)), set()).update([frozenset(set(w))])
+
+        # 如果没有新发现的FD，则完成
+        if len(new_fds) == old_size:
+            break
+            
+    return new_fds
+```
+
+## 总结
+
+函数依赖及其闭包是数据库设计中的关键概念，特别是在范式理论中。通过理解这些原理和应用投影算法可以更好地理解和优化关系模式的设计。

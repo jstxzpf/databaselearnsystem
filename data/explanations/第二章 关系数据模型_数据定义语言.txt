@@ -1,0 +1,58 @@
+# 数据定义语言 (Data Definition Language, DDL)
+
+## 定义
+数据定义语言（DDL）是指用于定义和管理关系数据库中模式(schema)的SQL命令集合。它允许用户创建、修改或删除表格等结构化的组件，并能够对这些组件设置访问权限。常见的DDL语句包括CREATE、ALTER、DROP和TRUNCATE。
+
+### 重要性及应用场景
+- **重要性**：数据定义语言为用户提供了一种标准化的方式来管理和维护数据库结构，这对于确保数据库的一致性和完整性至关重要。
+- **应用场景**：
+    - 创建新的表格来存储新类型的业务数据。
+    - 修改现有表格的字段或约束条件以适应业务需求的变化。
+    - 删除不再需要的数据表。
+    - 清空表中的所有记录而不删除表本身（使用TRUNCATE语句）。
+
+### 示例
+以下是一些常用的DDL语句示例：
+
+#### 创建数据库和数据表：
+```sql
+-- 创建新数据库
+CREATE DATABASE MyDatabase;
+
+USE MyDatabase;  -- 使用该数据库
+
+-- 创建表格
+CREATE TABLE Customers (
+    ID INT PRIMARY KEY,
+    FirstName VARCHAR(25),
+    LastName VARCHAR(30)
+);
+```
+
+#### 修改现有表格
+```sql
+ALTER TABLE Customers 
+ADD EmailAddress VARCHAR(100);  -- 添加新字段
+```
+在上述示例中，我们向现有的Customers表添加了一个EmailAddress列。
+
+### DDL语句关系图
+
+下面的图表展示了创建和修改数据库结构的关键DDL命令之间的逻辑关系：
+
+```mermaid
+graph TD
+    A[CREATE DATABASE] -->|Creates a new database| B[USE]
+    B --> C[CREATE TABLE]
+    C --> D[ALTER TABLE]
+    D -.-> E[DROP TABLE]
+```
+
+### 解释图表：
+- `A` 创建一个新的数据库。
+- `B` 使用上一步创建的数据库，准备在此基础上定义表格结构。
+- `C` 定义和初始化一个或多个数据表的结构。
+- `D` 修改现有表的数据结构，比如添加、删除或者修改列。
+- 从`D`到`E`的虚线箭头表示在完成对某些表的操作后可以删除它们。这表明了`ALTER TABLE`语句与数据库维护和清理过程中的关键性。
+
+通过理解DDL及其应用，开发者能够有效地管理和优化关系型数据库，从而提高数据存储系统的整体性能和效率。

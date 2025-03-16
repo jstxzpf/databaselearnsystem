@@ -1,0 +1,78 @@
+## 第四范式的定义和第四范式分解
+
+### 1. 定义与原理
+
+在关系型数据库中，规范化是一种过程，旨在减少数据冗余并提高数据库效率。第四范式（4NF）是规范化的一种形式，在第三范式的基础上进一步消除多值依赖性问题。
+
+**第四范式的定义：**
+一个关系模式属于第四范式(4NF)，当且仅当对于每一个非平凡的、完全函数依赖于主键的多值依赖A->>B，不存在A的真子集X使得X->>B也成立。换句话说，在没有任何两个属性（或属性组合）具有相同的非平凡多重性的关系中满足第四范式。
+
+**简单来说：**
+- 如果一个表中存在某个字段包含的数据项可以进一步分类为更细粒度的值，但这些更小的值并不完全由主键决定，则该表违反了4NF。
+- 例如，在一个课程项目分配表中，学生和项目的组合可能有多条记录（每个学生可以参与多个项目），如果每个项目都有其特定的主题领域，并且这个领域并不是通过学生或项目唯一确定的话，那么这样的设计就违背了4NF。
+
+### 2. 在数据库系统中的作用
+
+- **减少数据冗余**：通过消除重复的数据值，确保每个属性只出现一次。
+- **提高查询效率**：由于数据冗余的减少和多值依赖性的去除，可以简化查询语句并加快查询速度。
+- **维护数据一致性**：减少不必要的修改操作，避免在不同的地方更新相同的信息时造成的不一致。
+
+### 3. 实际应用场景与示例
+
+假设我们有一个学生参与项目（Projects）的关系表如下：
+```sql
+CREATE TABLE Projects (
+    StudentID INT,
+    ProjectName VARCHAR(50),
+    ThemeArea VARCHAR(100)
+);
+```
+
+在这个表中，如果一个学生的多个项目可以属于不同的主题领域（Theme Area），并且这个领域不能通过学生或项目唯一确定的话，则该关系违背了4NF。为了解决这个问题，我们可以将表格分解成两个独立的关系：
+```sql
+CREATE TABLE StudentProjects (
+    StudentID INT,
+    ProjectName VARCHAR(50),
+    PRIMARY KEY (StudentID, ProjectName)
+);
+
+CREATE TABLE ProjectThemeAreas (
+    ProjectName VARCHAR(50),
+    ThemeArea VARCHAR(100),
+    PRIMARY KEY (ProjectName, ThemeArea)
+);
+```
+
+这种分解方式确保了每个主题领域只能在一个地方被定义，从而满足4NF的要求。
+
+### 4. 相关SQL代码或实现方法
+
+通过上面的示例可以看出如何使用SQL语句创建遵守4NF的关系模式。首先我们删除原来不合规的关系表：
+```sql
+DROP TABLE Projects;
+```
+然后创建新的关系来代替它：
+```sql
+CREATE TABLE StudentProjects (
+    StudentID INT,
+    ProjectName VARCHAR(50),
+    PRIMARY KEY (StudentID, ProjectName)
+);
+
+CREATE TABLE ProjectThemeAreas (
+    ProjectName VARCHAR(50),
+    ThemeArea VARCHAR(100),
+    PRIMARY KEY (ProjectName, ThemeArea)
+);
+```
+
+### 5. Mermaid图表
+
+流程图示例：
+```mermaid
+graph TD
+    A[违反4NF的表] --> B[将数据分类]
+    B --> C[创建两个独立的关系表]
+    C --> D[满足4NF]
+```
+在这个简单的流程图中，我们展示了从不遵守第四范式的状态开始到通过分解达到规范化的过程。

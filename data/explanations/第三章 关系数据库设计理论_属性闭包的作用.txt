@@ -1,0 +1,93 @@
+# 属性闭包的作用
+
+在关系型数据库理论中，**属性闭包（Attribute Closure）** 是一个非常重要的概念，它用于确定给定的一组属性（也称为候选键或超键的一部分）可以决定哪些其他属性的值。
+
+## 定义和原理
+
+### 定义
+设 R(U,F) 表示关系模式R及其依赖集F。对于任何属性子集X属于U, X在F中的闭包，记为X+，是指根据给定函数依赖集F所能确定的所有可能的属性集合。
+
+**属性闭包**可以定义为：对于一个属性或属性组合X，在一组函数依赖FD（Function Dependency） F 下面能够确定的所有其他属性的集合。即如果X+表示属性X的闭包，则X+包含了所有由X通过应用FD集F能决定的属性，包括X自己。
+
+### 原理
+- **传递性**：如果A决定B，并且B决定C，则A也能直接决定C。
+- **自反性**：任何一个属性可以确定它自己的值。
+- **组合规则**：若A和B都能决定C, 则AB一起也能决定C。
+
+## 在数据库系统中的作用
+
+在数据库设计中，理解属性闭包对于确保数据的完整性和一致性至关重要。通过计算候选键（即唯一标识行的最小超键）的所有属性闭包，我们可以验证关系模式是否符合第三范式(3NF)或BC范式的标准。这些步骤有助于减少数据冗余和异常更新。
+
+此外，在查询优化时理解各属性间的依赖关系可以提高效率：例如通过确定一个合适的索引集来加快查询速度；或者在执行联接操作时知道哪些列是必要的，从而避免不必要的计算开销。
+
+## 实际应用场景与示例
+
+考虑如下用户订单表结构：
+
+| 属性名  | 描述                 |
+| ------- | -------------------- |
+| OrderID | 订单号              |
+| UserID  | 用户ID              |
+| Product | 商品                |
+| Quantity| 数量               |
+
+假设函数依赖集为：
+- **OrderID** -> *UserID, Product, Quantity*
+- **(UserID, Product)** -> *Quantity*
+
+我们需要确定哪些属性可以构成候选键。首先，根据给定的FD集合计算每个可能超键的闭包：
+
+```plaintext
+F = { (OrderID) -> UserID, (OrderID) -> Product, (OrderID) -> Quantity,
+      (UserID, Product) -> Quantity }
+```
+
+### 计算属性闭包
+
+1. **(OrderID)**+
+   - 根据给定的FD，OrderID可以决定所有其他三个属性。
+   - 因此 (OrderID)+ = { OrderID, UserID, Product, Quantity }
+
+2. **(UserID, Product)**
+   - 由于(UserID, Product) -> Quantity，但无法通过它直接找到OrderID和Product的值。
+   - 因此 (UserID, Product)+ = { UserID, Product, Quantity }
+
+根据上述结果可以推断出(OrderID) 是候选键，因为它的闭包包含了所有属性。而（UserID, Product）虽然也可以作为唯一确定性标识符但不是最简化的。
+
+## 相关SQL代码或实现方法
+
+在实际应用中可以通过编程语言或者数据库管理系统提供的函数来计算属性闭包。下面是一个简单的Python示例（不直接涉及执行SQL命令），用于演示如何手动计算闭包：
+
+```python
+def closure(X, FDs):
+    result = set(X)
+    old_closure = None
+    
+    while old_closure != result:
+        old_closure = result.copy()
+        for LHS in FDs.keys():
+            if X & FDs[LHS]:  # 如果X包含LHS中的所有属性
+                result.update(FDs[LHS])  # 添加LHS决定的所有属性到结果中
+    
+    return list(result)
+
+# 示例FD集合
+F = {'OrderID': ['UserID', 'Product', 'Quantity'], ('UserID', 'Product'): ['Quantity']}
+print(closure(['OrderID'], F))  # 输出：['OrderID', 'UserID', 'Product', 'Quantity']
+```
+
+> 注意到，实际的数据库系统可能有内置函数或库支持计算闭包等功能。
+
+## 使用Mermaid图表示关系
+
+```mermaid
+graph TD
+    A[开始] --> B{是否含有直接FD}
+    B -->|是| C[添加相关属性]
+    C --> D[(X) -> Y?]
+    D -->|否| E[结束]
+    D -->|是| F[继续遍历其他FD]
+    F --> B
+```
+
+以上流程图展示了从给定的初始属性集X开始，通过应用函数依赖来逐步计算其闭包的过程。

@@ -1,0 +1,33 @@
+# 传递规则在数据库中的定义和重要性
+
+## 定义
+**传递规则**（Transitive Rule）主要应用于关系数据库理论中，特别是在范式化过程中的一个关键步骤。它通常用于3NF（第三范式）及BCNF（Boyce-Codd范式）。根据这个规则，如果在模式R(U)中有函数依赖X→Y和Y→Z，则可以推断出X→Z。
+
+## 重要性和应用场景
+传递规则对于数据库设计具有至关重要的意义。它确保了数据表中的信息尽可能减少冗余，并且保持一致的结构。具体来说：
+- **去冗余**：通过应用传递规则，可以帮助发现并消除不必要的属性依赖，从而减少存储空间。
+- **一致性**：保证当某些数据发生变化时，数据库中与之相关的所有记录都能得到及时更新，减少了不一致的可能性。
+
+在实际项目开发中，遵循这一原则能够帮助程序员和设计师构建更高效、更易于维护的数据库系统。例如，在电商网站的设计过程中，通过使用传递规则可以确保一个商品的所有属性信息都正确无误地存储，并且当这些属性改变时（如价格更新），相关信息能自动同步到所有相关联的地方。
+
+## 示例
+假设有一个销售订单表Order，其包含以下字段：CustomerID、ProductID和Quantity。我们进一步知道存在函数依赖CustomerID→CustomerName 和 ProductID→ProductName。
+根据传递规则, 我们可以推断出：
+- CustomerID → ProductName (通过 CustomerID→ProductID 和 ProductID→ProductName 推导)
+- ProductID → CustomerName (通过 ProductID→CustomerID 和 CustomerID→CustomerName 推导)
+
+这意味着，如果订单表中存储了顾客ID和产品ID，那么就可以直接从这些信息推断出顾客名或产品名称。但是，在实际设计时，为了减少冗余，我们通常会分别在Customer和Product表里单独存放这些数据，然后通过Order表关联。
+
+## Mermaid图表描述传递规则关系
+```mermaid
+graph TD
+    A[CustomerID] --> B[CustomerName]
+    C[ProductID] --> D[ProductName]
+    E[CustomerID] --> F[ProductID]
+    G[F] --> H[D]
+    I[A] --> J[H]
+```
+
+这个图表展示了如何通过传递规则从`CustomerID`和`ProductID`推导出相应的顾客名和产品名。这帮助理解在数据库设计中，减少冗余信息的重要性及其实际应用方式。
+
+通过以上解释与示例，希望同学们能更好地理解和运用传递规则这一概念，在未来的数据库设计课程或项目实践中加以利用。

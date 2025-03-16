@@ -1,0 +1,46 @@
+### 关系上的键：定义与重要性
+
+**关系上的键（Key in a Relation）** 是数据库设计中的一个重要概念，主要用于确保数据的唯一性和完整性。
+
+- **主键（Primary Key）**：在一张表中用来唯一标识每个记录的关键字段。一个表只能有一个主键，并且不允许出现重复值。
+- **外键（Foreign Key）**：用于建立和加强两个表之间的关系，在从表中引用主表的主键，通过这种关联可以实现数据一致性。
+
+### 关系上的键的重要性与应用场景
+
+1. **确保唯一性**: 通过设置主键可以保证每条记录都是唯一的。例如在学生信息管理数据库中，学生的学号通常作为主键。
+2. **维护完整性**: 外键帮助我们构建表之间的关系，确保数据的引用一致性。比如在一个订单系统中，订单表中的客户ID是外键，它必须与客户表中的主键相匹配。
+3. **简化查询和更新操作**：通过使用键，可以更高效地执行数据库操作（如JOIN）来获取相关的数据记录。
+
+### 示例解析
+
+假设我们有两个表格：
+- `Students` 表示学生信息
+  - 学号 (StudentID)
+  - 姓名 (Name)
+  - 年龄 (Age)
+
+- `Courses` 表示课程信息
+  - 课号 (CourseID)
+  - 课程名 (Title)
+  - 教师姓名 (TeacherName)
+
+为了表示学生选修的每门课程，我们需要创建第三个表：
+- `Enrollments` 表示学生的选课情况
+  - 学生ID (StudentID)：该字段作为外键引用 `Students.StudentID`
+  - 课号 (CourseID)：该字段作为外键引用 `Courses.CourseID`
+
+在这个例子中，`Enrollments` 表中的 `StudentID` 和 `CourseID` 是用来建立学生和课程关系的外键。这样的设计保证了每个选修记录都与特定的学生和课程相关联。
+
+### 使用Mermaid图表描述概念的关系或流程
+
+下面是一个简单的图表来展示三者之间的关联性：
+
+```mermaid
+graph TD
+    A[Students] -->|StudentID as Primary Key| B(Enrollments)
+    C[Courses] -->|CourseID as Primary Key| D(Enrollments)
+    E[StudentID as Foreign Key in Enrollments]
+    F[CourseID as Foreign Key in Enrollments]
+```
+
+这个图表展示了`Students`和`Courses`表分别通过它们的主键连接到 `Enrollments` 表。同时，`Enrollments`中的外键关系确保了每个记录都符合来自其他两个表的数据结构。

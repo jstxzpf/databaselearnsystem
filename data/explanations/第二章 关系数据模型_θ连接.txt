@@ -1,0 +1,61 @@
+# θ连接（Theta Join）详解
+
+θ连接是一种在关系型数据库中实现数据合并的技术，用于将两个或多个表格中的数据根据特定条件进行匹配和组合。
+
+## 定义与原理
+
+- **定义**：θ连接是指基于一个或多个逻辑比较运算符(如=, <>, >, >=等)连接两个或者更多表（关系）的SQL操作。
+  
+- **原理**：
+  - 首先，数据库系统会根据指定的θ条件筛选出匹配的数据行。
+  - 然后，对于每个符合条件的组合，θ连接会在结果集中创建一行新的数据记录。该行将包括来自两个或更多表的所有相关列。
+
+## 在数据库中的作用
+
+- **提高查询效率**：通过合并来自不同表的相关信息，可以减少查询所需的数据量和计算复杂性。
+- **简化SQL语句**：相比于执行多个独立的查询再进行外部连接操作，θ连接可以直接在一个步骤中完成数据整合，使代码更加简洁高效。
+
+## 实际应用场景与示例
+
+假设我们有两个表格：`Customers` 和 `Orders`。每个客户的订单信息存储在`Orders`表中，并且这两个表通过客户ID(`CustomerID`)关联在一起。
+
+| Customers (customer_id, customer_name) |
+| :---: | ---:|
+| 101   | 张三    |
+| 102   | 李四    |
+
+| Orders (order_id, order_date, customer_id, amount) |
+| :---: | ---: | :---: | ---: |
+| 1     | 2023-04-05 | 101 | 50.5 |
+| 2     | 2023-04-06 | 102 | 89.9 |
+
+现在，我们想要获取所有客户的订单信息（包括客户姓名），可以使用θ连接完成此操作。具体来说：
+
+```sql
+SELECT Customers.customer_name, Orders.order_date, Orders.amount 
+FROM Customers 
+JOIN Orders ON Customers.customer_id = Orders.customer_id;
+```
+
+上述SQL语句的作用就是将`Customers`和`Orders`两张表中通过customer_id关联的数据进行合并，并输出客户的姓名、订单日期及订单金额。
+
+## 用Mermaid画图表示θ连接
+
+```mermaid
+graph TD
+    A[Customers] -->|ON customer_id = customer_id| B[Orders]
+```
+
+这幅图表简单明了地展示了θ连接的基本操作，即通过匹配`customer_id`字段来合并两个表格的数据。
+
+## 相关SQL代码或实现方法
+
+如上所示的SQL查询语句是标准的实现方法。此外，还可以使用其他方式完成相同的操作，例如使用`WHERE`子句手动指定条件：
+
+```sql
+SELECT Customers.customer_name, Orders.order_date, Orders.amount 
+FROM Customers, Orders 
+WHERE Customers.customer_id = Orders.customer_id;
+```
+
+此例中虽然结果与上一个示例一致，但通常推荐使用JOIN语句来增强代码的可读性和维护性。

@@ -1,0 +1,98 @@
+# 第三范式（Third Normal Form, 3NF）详解
+
+第三范式是在关系型数据库设计中一个重要的规范化标准。它确保在满足第二范式的前提下进一步消除非主属性对键的传递依赖。
+
+## 定义和原理
+
+### 定义
+
+**第三范式（3NF）** 是一种数据模型的设计规则，该规则保证了每个非主关键字都直接依赖于表中的主键。具体而言，在一个关系模式中，如果每一个非平凡函数依赖X->Y的决定因素X包含候选键（或超级键），那么这个关系模式是第三范式的。
+
+- **非平凡函数依赖**：指不能通过简单推导出来的依赖关系。
+- **决定因素**：能够确定其他属性值的因素集。
+- **候选键**：能唯一标识表中每条记录的最小属性集合，即主键或者超键的一种形式。
+
+### 原理
+
+当一个数据库模式满足第二范式的要求时（所有非关键字段只依赖于该模式的关键字），我们需要进一步检查是否存在某些非关键字字段间接地依赖于其他非关键字字段。如果存在这种情况，则必须将这些数据分解到另一个表中，以确保每个非关键字段仅直接取决于主键。
+
+## 在数据库系统中的作用
+
+第三范式的应用可以减少数据冗余、提高数据一致性以及防止更新异常（如插入异常、删除异常和修改异常）。它通过消除传递函数依赖关系来保证数据库的最小冗余性和高内聚性，使得每个非主属性直接依赖于候选键。
+
+## 实际应用场景与示例
+
+假设有一个学校数据库系统需要存储课程信息和学生选课信息。原始表结构如下：
+
+| 课程ID | 课程名称 | 教师姓名 | 学生ID | 成绩 |
+|--------|---------|----------|--------|------|
+| CS101  | 计算机基础| 张三    | S12345| 89   |
+| EN201  | 英语精读| 李四    | S12346| 78   |
+
+根据第三范式的要求，可以将这个表分解为两个独立的关系模式：
+
+- `课程`：存储每个课程的基本信息
+```sql
+CREATE TABLE Course (
+    CourseID CHAR(5) PRIMARY KEY,
+    CourseName VARCHAR(50),
+    TeacherName VARCHAR(20)
+);
+```
+
+- `选课成绩`：仅记录学生的选课情况和相应成绩
+```sql
+CREATE TABLE StudentGrade (
+    StudentID CHAR(6),
+    CourseID CHAR(5),
+    Grade INT,
+    PRIMARY KEY (StudentID, CourseID),
+    FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
+);
+```
+
+这样设计后，每个非主属性都只依赖于其所在的表的主键。例如，在`课程`表中，课程名称和教师姓名直接由课程编号（主键）决定；而在`选课成绩`表里，则仅有学生的学号与所选课程对应的成绩。
+
+## 相关SQL代码
+
+### 创建符合3NF的数据表结构
+```sql
+CREATE TABLE Course (
+    CourseID CHAR(5) PRIMARY KEY,
+    CourseName VARCHAR(50),
+    TeacherName VARCHAR(20)
+);
+
+CREATE TABLE StudentGrade (
+    StudentID CHAR(6),
+    CourseID CHAR(5),
+    Grade INT,
+    PRIMARY KEY (StudentID, CourseID),
+    FOREIGN KEY (CourseID) REFERENCES Course(CourseID)
+);
+```
+
+### 插入数据
+```sql
+-- 课程表插入示例数据
+INSERT INTO Course VALUES ('CS101', '计算机基础', '张三');
+INSERT INTO Course VALUES ('EN201', '英语精读', '李四');
+
+-- 学生选课成绩表插入示例数据
+INSERT INTO StudentGrade VALUES ('S12345', 'CS101', 89);
+INSERT INTO StudentGrade VALUES ('S12346', 'EN201', 78);
+```
+
+## 流程图
+
+以下是数据库规范化过程中从原始表到符合第三范式的分解流程示意图：
+```mermaid
+graph TD
+    A[原始数据表] --> B{是否满足第二范式?}
+    B -->|否| C[消除部分函数依赖]
+    B -->|是| D[检查传递依赖关系]
+    D -->|存在| E[进行进一步分解]
+    D -->|不存在| F[符合第三范式]
+```
+
+通过遵循这一流程，我们可以确保设计出更加优化、高效且易于维护的数据库模式。

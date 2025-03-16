@@ -1,0 +1,63 @@
+# BC范式简介
+
+BC范式（Boyce-Codd Normal Form）是关系数据库设计中的一种规范化标准，它是在第三范式的基础上进一步消除非主属性对候选键的传递依赖和多值依赖。BC范式的定义如下：
+
+## 定义
+
+**BC范式**：如果一个关系模式R属于第三范式，并且对于每一个决定因素X（X是超键），都有F(X)为平凡函数依赖，那么称R属于BC范式。
+
+简单来说，当关系模式满足第三范式，同时不存在非主属性对候选键的传递和多值依赖时，则该关系模式达到了BC范式的要求。这里的“非主属性”是指不完全包含在任何候选键中的属性，“决定因素”即能够确定其他属性值的关键字（超键）。
+
+## 重要性及应用场景
+
+### 重要性
+1. **减少数据冗余**：通过消除非主属性对候选键的传递依赖和多值依赖，可以有效避免不必要的数据重复。
+2. **提高系统性能**：减少的数据冗余意味着更少的空间使用，从而提高了系统的整体性能。
+3. **简化维护工作**：当数据库设计遵循BC范式时，更新操作（插入、删除、修改）更加直接和安全，减少了异常更新带来的问题。
+
+### 应用场景
+在构建任何需要长期存储大量数据的应用系统中，如电子商务平台、图书馆管理系统等，遵守BC范式的数据库可以更有效地处理数据，降低维护成本，并确保高效率的数据访问性能。
+
+## 示例
+
+假设有一个包含学生信息的表`StudentCourseInfo`：
+
+```sql
+CREATE TABLE StudentCourseInfo (
+    studentID INT,
+    courseID VARCHAR(10),
+    studentName VARCHAR(50),
+    department VARCHAR(20)
+);
+```
+
+这里，`(studentID, courseID)`是候选键。但是，从关系模式来看，`department`可能依赖于`courseID`（例如，每个课程都由特定的系提供）。这意味着存在传递依赖：`studentName -> studentID`, `courseID -> department`。
+
+为了达到BC范式的要求，我们需要将这种非主属性与候选键之间的传递依赖分解为两个独立的关系模式：
+
+```sql
+CREATE TABLE Students (
+    studentID INT PRIMARY KEY,
+    studentName VARCHAR(50)
+);
+
+CREATE TABLE Courses (
+    courseID VARCHAR(10) PRIMARY KEY,
+    department VARCHAR(20)
+);
+```
+
+通过这种设计，我们消除了非主属性对候选键的传递依赖，从而达到了BC范式的要求。
+
+## 关系图示
+
+```mermaid
+graph TD
+  A[StudentCourseInfo] -->|分解为| B(Student) & C(Course)
+  B --> D[(studentID, studentName)]
+  C --> E[(courseID, department)]
+```
+
+从上图可以看出，原本的`StudentCourseInfo`关系被有效地拆分为了两个新的关系模式：`Students`和`Courses`。这种设计不仅满足了BC范式的要求，还通过减少冗余数据提高了数据库的整体性能。
+
+以上就是关于“BC范式”的详细讲解，希望对你的学习有所帮助！

@@ -1,0 +1,84 @@
+# BC 范式的判定详解
+
+## 定义和原理
+
+**BC范式（Boyce-Codd Normal Form, 简称BCNF）**是关系数据库设计中的一个高级规范化形式。它是3NF的进一步扩展，确保消除所有非主属性对候选键的部分依赖和传递依赖。
+
+### BCNF定义
+- 如果对于关系模式R(U,F)中每一个函数依赖X→Y，都满足以下条件：
+  - X是一个超键（superkey）。
+  - X是一个候选键（candidate key）或空集。
+  
+> 强调：BCNF强调的是所有函数依赖左边的属性集合必须是候选键或者超键。
+
+### BCNF原理
+- **避免冗余数据**。在关系数据库设计中，通过将模式分解为BCNF形式来减少数据冗余和确保数据的一致性。
+- **防止更新异常**。如插入、删除或修改操作不会引起数据的不一致问题。
+
+## 在数据库系统中的作用
+
+### 规范化程度
+BCNF是规范化的一个重要步骤，在3NF之上，进一步减少了关系模式的数据冗余，并且使得每个非主属性都不传递依赖于任何候选键。
+
+### 数据库设计优化
+使用BCNF进行数据库设计可以确保数据库结构良好、高效。通过分解高阶规范的模式成BCNF形式的关系，可以帮助开发者更好地理解和维护数据表之间的关系。
+
+## 实际应用场景和示例
+
+假设有一个关于学生课程成绩的关系表`SC`（Student-Course），包含以下属性：学号Sno, 课程编号Cno, 成绩Grade。并且存在如下函数依赖：
+- Sno -> Sdept (学号决定所属系)
+- Cno -> Cname (课程编号决定课程名称)
+
+该模式并不满足BCNF，因为存在`Sno -> Sdept`，而`Sno`不是候选键（全集{Sno, Cno}）。需要将`SC`表分解为两个独立的表：一个是关于学号和系别，另一个是关于学生选课成绩。
+
+```mermaid
+graph TD
+    A[SC (原始模式)] --> B[SD]
+    A --> C[GC]
+    B --> D[Sno -> Sdept]
+    C --> E[Cno, Sno -> Grade]
+```
+
+- 表`SD`（Student-Department）: 学号Sno和所属系别Sdept
+- 表`GC`（Grade-Course）: 课程编号Cno，学号Sno和成绩Grade
+
+经过这样的分解之后，新的模式满足BCNF的要求。
+
+## 相关SQL代码或实现方法
+
+以下是对上述例子进行SQL操作的示例：
+
+```sql
+-- 创建原始SC表结构
+CREATE TABLE SC (
+    Sno CHAR(9),
+    Cno CHAR(4),
+    Grade DECIMAL(3,1)
+);
+
+-- 插入一些数据
+INSERT INTO SC VALUES ('02', '101', 86);
+INSERT INTO SC VALUES ('07', '101', 90);
+INSERT INTO SC VALUES ('02', '102', NULL);
+INSERT INTO SC VALUES ('04', '103', 82);
+
+-- 创建新的SD表
+CREATE TABLE SD (
+    Sno CHAR(9),
+    Sdept VARCHAR(6)
+);
+
+-- 插入数据到SD中
+INSERT INTO SD SELECT Sno, Sdept FROM Student WHERE Sdept IN (SELECT Sdept FROM SC GROUP BY Sdept HAVING COUNT(DISTINCT Sdept) > 1);
+
+-- 创建新的GC表
+CREATE TABLE GC (
+    Cno CHAR(4),
+    Sno CHAR(9),
+    Grade DECIMAL(3,1)
+);
+```
+
+在这个例子中，我们通过创建新的`SD`和`GC`表并填充相应的数据来实现了模式的分解。这使得新模型满足BCNF的要求。
+
+总结来说，BC范式是数据库设计中的一个重要步骤，确保了关系结构的高度规范化和减少冗余，同时避免更新异常的发生。

@@ -1,0 +1,52 @@
+### 无损连接的定义
+
+在关系型数据库管理系统中，**无损连接（Lossless Join）** 是一种属性，在这种情况下，执行连接操作后可以恢复原始数据表中的所有元组，也就是说，连接后的结果可以重新拆分为原来的两个或多个表格而不会丢失任何信息。
+
+### 重要性和应用场景
+
+无损连接对于确保数据库设计的质量和一致性非常重要。它保证了在将关系模式分解成更小的关系之后，通过执行适当的连接操作仍然能够恢复原始的数据模型而不会丢失数据或者产生冗余信息。这对于维护数据完整性至关重要，尤其是在分布式数据库系统中，不同的部分可能分别存储相同数据的不同视图或子集。
+
+### 示例
+
+假设有一个包含员工基本信息和部门的表 `Employees` 和一个记录员工职位晋升历史的表 `Promotions`：
+
+```sql
+CREATE TABLE Employees (
+    EmployeeID INT PRIMARY KEY,
+    Name VARCHAR(50),
+    DepartmentID INT
+);
+
+CREATE TABLE Promotions (
+    PromotionID INT PRIMARY KEY AUTO_INCREMENT,
+    EmployeeID INT,
+    NewPosition VARCHAR(100),
+    Date DATE,
+    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+);
+```
+
+如果我们执行内连接（INNER JOIN）操作来获取每个员工的晋升记录，无损连接确保我们可以从结果表中重新构建 `Employees` 和 `Promotions` 表而不会丢失任何信息：
+
+```sql
+SELECT * FROM Employees e INNER JOIN Promotions p ON e.EmployeeID = p.EmployeeID;
+```
+
+通过这种方式保证了数据完整性，并且在需要时可以方便地进行数据恢复。
+
+### Mermaid 图表
+
+以下是一个简单的Mermaid图，说明两个表格之间执行无损连接后的概念流程：
+
+```mermaid
+graph TD
+    A[Employees] -->|内连接| B{Promotions}
+    C[EmployeeID] -- 作为键 --> D[B表 EmployeeID]
+```
+
+在这个图表中：
+- 表格`A`代表`Employees`
+- `B`代表与`Promotions`相关的逻辑判断流程，即是否可以通过内连接操作
+- 连接的主键（在这里是EmployeeID）在两个表格之间建立联系，确保了无损连接的可能性
+
+通过这种方式，可以直观地展示如何利用共同的键来实现两个表之间的无损连接。

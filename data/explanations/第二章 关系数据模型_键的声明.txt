@@ -1,0 +1,70 @@
+# 键的声明在数据库中的重要性及应用
+
+## 1. 定义与原理
+
+**键（Key）**是关系型数据库中的一种特殊属性或一组属性，用于唯一标识表中的一个记录。键的概念主要用于确保数据的一致性和完整性，并支持高效的查询操作。
+
+- **主键（Primary Key）**: 表中最核心的键，每个记录都必须有唯一的主键值，不允许为空。
+- **外键（Foreign Key）**: 在一个表中引用另一个表的主键。它用来建立和加强两个表数据之间的链接关系，实现参照完整性。
+
+## 2. 键的作用
+
+1. **唯一性**：确保每条记录在表中的唯一身份标识。
+2. **关联性**：通过外键机制，可以在不同的表之间创建连接（JOIN），从而能够查询跨多个表的数据。
+3. **数据完整性**：限制和控制数据插入、更新或删除操作，以防止违背业务逻辑的操作发生。
+
+## 3. 实际应用场景
+
+- 在一个学生课程注册系统中：
+    - 学生表可能有`student_id`(主键)和其他信息如姓名等。
+    - 课程表也有自己的`course_id`(主键)，包括课程名称、时间等内容。
+    - 注册表（或称作课程选择表）记录了哪些学生选修了哪门课，这里可以使用学号和课程ID作为外键。
+
+## 4. SQL代码实现
+
+假设我们有三个表格：students, courses, enrollments。以下是创建这些表及其关系的SQL语句：
+
+```sql
+CREATE TABLE students (
+    student_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(50)
+);
+
+CREATE TABLE courses (
+    course_id INT PRIMARY KEY,
+    title VARCHAR(100),
+    credits INT
+);
+
+CREATE TABLE enrollments (
+    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT,
+    course_id INT,
+    grade CHAR(2),
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+```
+
+这里，`students`表中的`student_id`是主键。在`enrollments`表中，我们声明了两个外键：一个是`student_id`引用`students`表的`student_id`，另一个是`course_id`引用`courses`表的`course_id`。
+
+## 5. 关系图
+
+使用Mermaid图表来展示学生、课程和注册之间的关系：
+
+```mermaid
+graph TD
+    A[Students] -->|student_id (PK)| B(Enrollments)
+    C[Courses] -->|course_id (PK)| B
+    B --> D[Grades]
+```
+
+### 图表解释
+
+- A: 表示学生表，主键为`student_id`
+- B: 注册（enrollment）表，作为中间表，连接了学生和课程。
+- C: 课程表，主键为`course_id`
+- 箭头：代表外键的关系。例如，“A”指向“B”，表示注册表中的`student_id`引用了学生表的主键。
+
+通过使用这样的图表，你可以更清晰地看到数据库中各个实体之间的关系和依赖性。
