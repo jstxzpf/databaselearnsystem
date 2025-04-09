@@ -1,0 +1,85 @@
+# 联系的多重性表示详解
+
+在关系型数据库中，实体之间的关联是非常重要的概念之一。联系（或称为关联）是指两个或多个表之间存在的数据关系，而多重性则是描述这些联系强度和数量特性的关键特征。
+
+## 定义与原理
+
+**多重性：** 描述了一个类中的对象可以与其他类的对象建立多少个实例的联系。例如，在订单系统中，一个客户可以创建多份订单（1对多），但一份订单只能属于一名顾客（多对1）。
+
+在数据库建模时，通过ER模型图来直观表示实体间的多重性关系：
+
+- **一对一 (1:1)：** 一个实体中的每个实例与另一个实体中恰好一个实例相关联。
+- **一对多 (1:N)：** 一个实体中的每个实例可以与其他多个实体的单个实例关联，但这些其他实体中的每一个只能与这个单一的实体有一个这样的关系。
+- **多对一 (N:1)：** 可以认为是一对多的反向表达，即多个实例与另一个单一实例的关系。
+- **多对多 (M:N)：** 多个实例可以与其他多个实例相关联。这种类型的关联需要一个中间表来建立和管理关系。
+
+## 在数据库系统中的作用
+
+多重性是设计有效的数据库模式的关键因素之一。它帮助开发者理解数据之间的自然依赖关系，并且在模型的早期阶段就做出合理的假设，避免不必要的复杂性和冗余。
+
+通过正确地定义多重性，可以确保实体间的关系清晰明确，从而减少查询时的数据不一致和性能问题。
+
+## 实际应用场景与示例
+
+- **图书管理系统：**
+  - `作者(author)` 和 `书籍(book)` 是一对多关系。一个作者可能有写多本书（1:N），但一本书只能有一个作者。
+  
+- **社交网络应用：**
+  - 用户(user) 和 友谊(friendship) 是多对多的关系。用户之间可以互相添加为朋友，每个用户都可以有许多朋友。
+
+## 相关SQL代码或实现方法
+
+对于上述的图书管理系统实例：
+
+```sql
+CREATE TABLE author (
+    id INT PRIMARY KEY,
+    name VARCHAR(100)
+);
+
+CREATE TABLE book (
+    id INT PRIMARY KEY,
+    title VARCHAR(255),
+    author_id INT, -- foreign key to the author table,
+    FOREIGN KEY (author_id) REFERENCES author(id)
+);
+```
+
+对于多对多关系，比如社交网络中的用户和朋友：
+
+```sql
+CREATE TABLE user (
+    id INT PRIMARY KEY,
+    username VARCHAR(100)
+);
+
+CREATE TABLE friendship (
+    initiator_user_id INT, -- foreign key to the user table,
+    target_user_id INT, -- foreign key to the user table,
+    PRIMARY KEY (initiator_user_id, target_user_id),
+    FOREIGN KEY (initiator_user_id) REFERENCES user(id),
+    FOREIGN KEY (target_user_id) REFERENCES user(id)
+);
+```
+
+## Mermaid图表描述流程或关系
+
+对于图书管理系统：
+
+```mermaid
+graph TD
+  A[Author] -->|1| B{Book}
+  B --> C[One-to-Many]
+  A --> C
+```
+
+对于社交网络应用中的用户和朋友的关系图示：
+
+```mermaid
+graph TD
+  A[User] -->|N| B{Friendship}
+  B --> C[Friend]
+  A --> C
+```
+
+通过这些图表，我们能够更加直观地理解实体之间的联系以及它们的多重性是如何描述和实现的。

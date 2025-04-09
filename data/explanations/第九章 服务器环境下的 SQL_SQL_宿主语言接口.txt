@@ -1,0 +1,60 @@
+## SQL/宿主语言接口简介
+
+想象一下，在一个繁忙的厨房里，厨师（SQL）和餐厅经理（宿主语言程序）之间的高效沟通是多么重要！他们可能需要合作来准备菜单上的新菜肴，并确保所有的食材都按时到货、新鲜可口。这里的“食材”可以看作是数据库中的数据，“菜谱”就是SQL语句，而餐厅经理的任务则是编写一个让厨师能够轻松理解的指令集。
+
+### 定义
+
+**SQL/宿主语言接口** 是一种机制，它允许编程语言（如Python、Java等）直接调用和执行SQL命令。通过这个接口，开发人员可以将复杂的数据库操作嵌入到自己的应用程序中，使程序与数据库之间的交互更加灵活和高效。
+
+### 重要性及应用场景
+
+#### 重要性
+- **灵活性**：使得应用程序可以根据需求动态地生成和执行SQL语句。
+- **可维护性**：通过参数化查询等方式减少硬编码的SQL代码量，便于后期修改或扩展应用功能。
+- **效率**：利用预编译机制提高执行速度。
+
+#### 应用场景
+1. 在电子商务网站中，当用户搜索商品时，后端程序可以通过调用带有动态参数（如价格范围、类别等）的SQL语句来筛选和展示结果。
+2. 数据分析工具经常需要根据不同的需求从数据库提取特定的数据集进行处理。
+
+### 具体示例
+
+假设你正在使用Python开发一个简单的学生管理系统，其中包含“学生”表。你想实现的功能是查询特定班级的所有学生的姓名。
+
+1. **直接硬编码SQL**：不推荐的方式
+```python
+import sqlite3
+conn = sqlite3.connect('school_db')
+cursor = conn.cursor()
+sql_command = "SELECT student_name FROM students WHERE class_id=2"
+cursor.execute(sql_command)
+```
+
+2. **使用Python参数化查询（通过宿主语言接口）**
+这种方式更加灵活和安全。
+```python
+import sqlite3
+
+def get_students_in_class(class_id):
+    sql_query = "SELECT student_name FROM students WHERE class_id=?"
+    conn = sqlite3.connect('school_db')
+    cursor = conn.cursor()
+    cursor.execute(sql_query, (class_id,))
+    return cursor.fetchall()
+
+# 调用函数
+students_list = get_students_in_class(2)
+for student in students_list:
+    print(student[0])
+```
+
+### 概念关系图
+
+```mermaid
+graph TD
+    A[宿主语言程序] -->|调用SQL/宿主接口| B(SQL命令执行)
+    B --> C[数据库操作]
+    C --> D(获取结果集)
+```
+
+通过这个简单的例子，我们可以看到在现代软件开发中使用SQL/宿主语言接口的重要性。它不仅简化了开发者与数据库之间的交互过程，还提供了更多的灵活性和安全性选项。希望这能帮助你更好地理解这一关键概念！

@@ -1,0 +1,84 @@
+# 其它约束：让数据更靠谱！
+
+当我们谈论“其它约束”时，实际上是指在创建和管理关系型数据库中的表格（table）时使用的一系列规则或条件。这些规则包括唯一性、检查以及外键约束等等。下面我们将逐一讲解它们的定义、原理及其实际作用，并通过生动的例子来帮助理解。
+
+## 1. 唯一性约束 (Unique Constraint)
+
+### 定义与原理
+
+- **定义**：唯一性约束确保一个表中的某列或某些组合的值是唯一的。
+- **原理**：数据库在插入数据时会检查是否有重复的数据，如果发现有相同的记录，则不允许插入。
+
+### 作用
+
+通过使用唯一性约束来防止同一列内出现重复的值。这有助于保持数据的一致性和准确性，并且便于对特定的数据进行跟踪和检索。
+
+### 示例场景
+
+假设你管理一个学生社团网站，每位成员需要有一个唯一的用户名以便登录系统。为了确保没有两个用户具有相同的用户名（避免身份混淆），我们可以为用户名字段设置唯一性约束。
+
+```sql
+CREATE TABLE club_members (
+    member_id INT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE, -- 唯一性约束应用于username列
+    password_hash CHAR(64),
+    join_date DATE
+);
+```
+
+## 2. 检查约束 (Check Constraint)
+
+### 定义与原理
+
+- **定义**：检查约束用来限制特定表中的数据值的范围或格式，确保插入的数据符合预设条件。
+- **原理**：数据库在执行INSERT和UPDATE操作时会自动应用这些规则。如果新值不符合设定的标准，则拒绝该操作。
+
+### 作用
+
+利用检查约束可以更好地控制和验证用户输入的数据，提高数据质量并减少错误发生的机会。
+
+### 示例场景
+
+考虑一个在线商店的订单表(order)，其中包含支付金额字段(payment_amount)。为了确保没有负数或零元的订单，我们可以设置如下规则：
+
+```sql
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    customer_name VARCHAR(100),
+    payment_amount DECIMAL CHECK (payment_amount > 0), -- 检查约束防止支付金额小于等于零
+    purchase_date DATE
+);
+```
+
+## 3. 外键约束 (Foreign Key Constraint)
+
+### 定义与原理
+
+- **定义**：外键是两个表之间建立关联的一种机制。它链接了从属表中的一个或多个字段到主表（父表）的主键。
+- **原理**：当尝试插入或者更新数据时，数据库会检查引用关系是否合法，确保不破坏数据完整性。
+
+### 作用
+
+使用外键约束可以帮助维护不同表格间的数据一致性。例如在一个学生注册系统中，“课程”和“选课记录”的关联就是通过外键实现的。
+
+### 示例场景
+
+假设我们有两个表：courses（包含course_id作为主键）和enrollments（表示学生的选课情况），我们可以这样设置：
+
+```sql
+CREATE TABLE courses (
+    course_id INT PRIMARY KEY,
+    title VARCHAR(255),
+    credit_hours INT
+);
+
+CREATE TABLE enrollments (
+    student_id INT,
+    course_id INT, -- 外键引用courses表的course_id
+    semester VARCHAR(10),
+    grade CHAR(2),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+```
+
+以上就是数据库中“其它约束”的基本介绍。希望这些例子能帮助你更好地理解如何在实际项目中应用它们！
