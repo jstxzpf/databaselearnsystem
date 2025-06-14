@@ -16,23 +16,59 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Flask stuff:
+instance/
+.webassets-cache
 
 # Virtual Environment
 venv/
 env/
 ENV/
+.venv/
+env.bak/
+venv.bak/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+.spyderproject
+.spyproject
+.ropeproject
 
 # Logs
 *.log
+logs/
 
 # Local development settings
 .env
@@ -40,8 +76,59 @@ ENV/
 
 # System Files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Project specific
+# 项目特定文件
+# 数据库文件
+data/database.db
+data/database.db-journal
+
+# AI生成的讲解缓存（可选择性忽略）
+# data/explanations/
+
+# 上传文件
+static/uploads/*
+!static/uploads/.gitkeep
+
+# 系统设置文件（如果包含敏感信息可取消注释）
+# data/settings.json
+
+# 测试文件
+test_*.py
+debug_*.py
+test_*.html
+debug_*.html
+
+# 临时文件
+*.tmp
+*.temp
+*.bak
+*~
+
+# 文档草稿
+draft_*.md
+temp_*.md
+
+# 备份文件
+backup/
+*.backup
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+
+# 项目构建输出
 .repomix/
-repomix-output.txt 
+repomix-output.txt
+
+# Node.js (如果有前端构建工具)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

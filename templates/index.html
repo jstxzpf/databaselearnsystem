@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 数据库学习系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- 欢迎区域 -->
+        <div class="jumbotron bg-primary text-white rounded p-5 mb-4">
+            <div class="container">
+                <h1 class="display-4">
+                    <i class="fas fa-database me-3"></i>数据库学习系统
+                </h1>
+                <p class="lead">基于AI的智能数据库原理学习平台</p>
+                <hr class="my-4" style="border-color: rgba(255,255,255,0.3);">
+                <p>通过AI辅助学习数据库概念，智能生成考试试卷，自动批改试卷并提供学习建议</p>
+                <a class="btn btn-light btn-lg" href="{{ url_for('main.learning_page') }}" role="button">
+                    <i class="fas fa-play me-2"></i>开始学习
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 功能卡片 -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-book fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">智能学习</h5>
+                <p class="card-text">
+                    按章节浏览数据库概念和知识点，通过AI获取详细讲解和实例演示
+                </p>
+                <a href="{{ url_for('main.learning_page') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-right me-1"></i>进入学习
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-edit fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">智能考试</h5>
+                <p class="card-text">
+                    根据选定章节自动生成符合题型要求的考试试卷，支持多种题型
+                </p>
+                <a href="{{ url_for('main.exam_page') }}" class="btn btn-success">
+                    <i class="fas fa-arrow-right me-1"></i>生成试卷
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle fa-3x text-warning"></i>
+                </div>
+                <h5 class="card-title">智能审批</h5>
+                <p class="card-text">
+                    上传试卷进行智能分析和评价，获得详细的学习建议和改进方案
+                </p>
+                <a href="{{ url_for('main.review_page') }}" class="btn btn-warning">
+                    <i class="fas fa-arrow-right me-1"></i>审批试卷
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <!-- 系统特点 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>系统特点
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>AI驱动:</strong> 基于Ollama本地AI模型，提供智能化学习体验
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>个性化学习:</strong> 根据学习进度推荐内容，跟踪学习记录
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>多题型支持:</strong> 选择题、简答题、设计题等多种考试题型
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>智能批改:</strong> 自动分析答题情况，提供详细反馈
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>响应式设计:</strong> 支持桌面、平板、手机多端访问
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <strong>数据安全:</strong> 本地部署，数据隐私有保障
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <!-- 使用说明 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>使用说明
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-book text-primary me-2"></i>学习功能</h6>
+                        <ol class="small">
+                            <li>选择要学习的章节</li>
+                            <li>浏览章节的概念和知识点</li>
+                            <li>点击感兴趣的内容获取AI讲解</li>
+                            <li>系统会自动记录学习进度</li>
+                        </ol>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-edit text-success me-2"></i>考试功能</h6>
+                        <ol class="small">
+                            <li>选择要考查的章节</li>
+                            <li>选择题型和参数设置</li>
+                            <li>点击生成试卷</li>
+                            <li>下载生成的试卷文件</li>
+                        </ol>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-check-circle text-warning me-2"></i>审批功能</h6>
+                        <ol class="small">
+                            <li>上传已完成的试卷文件</li>
+                            <li>点击开始审批</li>
+                            <li>查看AI批改结果</li>
+                            <li>获取学习建议和改进方案</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,889 @@
+{% extends "base.html" %}
+
+{% block title %}学习 - 数据库学习系统{% endblock %}
+
+{% block extra_css %}
+<!-- Mermaid CSS -->
+<style>
+.mermaid {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.explanation-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.explanation-content table th,
+.explanation-content table td {
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.explanation-content table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.explanation-content table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.explanation-content h2 {
+    color: #495057;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.explanation-content h3 {
+    color: #6c757d;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.explanation-content code {
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+.explanation-content pre {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-book me-2"></i>智能学习</h2>
+            <div>
+                <button class="btn btn-outline-primary btn-sm" onclick="showProgress()">
+                    <i class="fas fa-chart-line me-1"></i>学习进度
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#searchModal">
+                    <i class="fas fa-search me-1"></i>搜索知识点
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 章节列表 -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-list me-2"></i>章节列表</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" id="chapters-list">
+                    {% for chapter in chapters %}
+                    <a href="#" class="list-group-item list-group-item-action chapter-item" 
+                       data-chapter="{{ chapter }}">
+                        <small>{{ chapter }}</small>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 概念和知识点列表 -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>概念与知识点</h6>
+                <div class="btn-group">
+                    <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" id="batchGenerateBtn" disabled>
+                        <i class="fas fa-magic"></i> 批量生成
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="batchExplainChapter()">
+                            <i class="fas fa-layer-group me-2"></i>批量生成本章节
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="batchExplainAll()">
+                            <i class="fas fa-globe me-2"></i>全部批量生成
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div id="concepts-loading" class="text-center p-4" style="display: none;">
+                    <div class="spinner-border spinner-border-sm" role="status">
+                        <span class="visually-hidden">加载中...</span>
+                    </div>
+                    <div class="mt-2">加载中...</div>
+                </div>
+                <div class="list-group list-group-flush" id="concepts-list">
+                    <div class="list-group-item text-muted text-center">
+                        <i class="fas fa-arrow-left me-2"></i>请选择章节
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI讲解内容 -->
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="fas fa-robot me-2"></i>AI讲解</h6>
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-warning btn-sm me-2" onclick="regenerateExplanation()" id="regenerateBtn" style="display: none;">
+                        <i class="fas fa-redo"></i> 重新生成
+                    </button>
+                    <div id="explanation-loading" style="display: none;">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">生成中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="explanation-content">
+                    <div class="text-muted text-center">
+                        <i class="fas fa-robot fa-3x mb-3"></i>
+                        <p>选择一个概念或知识点，AI将为您提供详细讲解</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 搜索模态框 -->
+<div class="modal fade" id="searchModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">搜索知识点</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search-input" placeholder="输入关键词搜索...">
+                        <button class="btn btn-primary" type="button" onclick="searchKnowledge()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="search-results">
+                    <div class="text-muted text-center">
+                        <i class="fas fa-search fa-2x mb-2"></i>
+                        <p>输入关键词开始搜索</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 批量生成进度模态框 -->
+<div class="modal fade" id="batchProgressModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-magic me-2"></i>批量生成进度
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span id="progress-text">准备开始...</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: 0%" id="progress-bar">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-success" id="success-count">0</div>
+                                <small class="text-muted">成功生成</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-danger" id="error-count">0</div>
+                                <small class="text-muted">生成失败</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="h4 text-info" id="total-count">0</div>
+                                <small class="text-muted">总计</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">当前处理</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="current-processing">
+                            <div class="text-muted">等待开始...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3" id="batch-log" style="max-height: 200px; overflow-y: auto;">
+                    <!-- 批量生成日志 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="batch-close-btn" disabled>关闭</button>
+                <button type="button" class="btn btn-danger" id="batch-cancel-btn">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Marked.js for Markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+<!-- Mermaid.js for diagram rendering -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<script>
+let currentChapter = '';
+let currentConcept = '';
+let currentType = '';
+
+$(document).ready(function() {
+    // 章节点击事件
+    $('.chapter-item').click(function(e) {
+        e.preventDefault();
+        const chapter = $(this).data('chapter');
+        selectChapter(chapter);
+    });
+    
+    // 搜索框回车事件
+    $('#search-input').keypress(function(e) {
+        if (e.which == 13) {
+            searchKnowledge();
+        }
+    });
+});
+
+function selectChapter(chapter) {
+    currentChapter = chapter;
+
+    // 更新UI状态
+    $('.chapter-item').removeClass('active');
+    $(`.chapter-item[data-chapter="${chapter}"]`).addClass('active');
+
+    // 启用批量生成按钮
+    $('#batchGenerateBtn').prop('disabled', false);
+
+    // 显示加载状态
+    $('#concepts-loading').show();
+    $('#concepts-list').hide();
+
+    // 获取章节内容
+    $.get(`/api/chapters/${encodeURIComponent(chapter)}/content`)
+        .done(function(data) {
+            if (data.success) {
+                displayChapterContent(data.content);
+            } else {
+                showError('获取章节内容失败: ' + data.error);
+            }
+        })
+        .fail(function() {
+            showError('网络错误，请稍后重试');
+        })
+        .always(function() {
+            $('#concepts-loading').hide();
+            $('#concepts-list').show();
+        });
+}
+
+function displayChapterContent(content) {
+    const conceptsList = $('#concepts-list');
+    conceptsList.empty();
+    
+    // 显示概念
+    if (content.concepts && content.concepts.length > 0) {
+        conceptsList.append('<div class="list-group-item bg-light"><strong>主要概念</strong></div>');
+        content.concepts.forEach(concept => {
+            conceptsList.append(`
+                <a href="#" class="list-group-item list-group-item-action concept-item" 
+                   data-concept="${concept}" data-type="concept">
+                    <i class="fas fa-lightbulb me-2 text-warning"></i>${concept}
+                </a>
+            `);
+        });
+    }
+    
+    // 显示知识点
+    if (content.contents && content.contents.length > 0) {
+        conceptsList.append('<div class="list-group-item bg-light"><strong>主要知识点</strong></div>');
+        content.contents.forEach(content_item => {
+            conceptsList.append(`
+                <a href="#" class="list-group-item list-group-item-action concept-item" 
+                   data-concept="${content_item}" data-type="content">
+                    <i class="fas fa-book me-2 text-info"></i>${content_item}
+                </a>
+            `);
+        });
+    }
+    
+    // 绑定点击事件
+    $('.concept-item').click(function(e) {
+        e.preventDefault();
+        const concept = $(this).data('concept');
+        const type = $(this).data('type');
+        explainConcept(concept, type);
+    });
+}
+
+function explainConcept(concept, type) {
+    currentConcept = concept;
+    currentType = type;
+    
+    // 更新UI状态
+    $('.concept-item').removeClass('active');
+    $(`.concept-item[data-concept="${concept}"]`).addClass('active');
+    
+    // 显示加载状态
+    $('#explanation-loading').show();
+    $('#explanation-content').html(`
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">AI正在生成讲解...</span>
+            </div>
+            <p class="mt-2">AI正在为您生成详细讲解，请稍候...</p>
+        </div>
+    `);
+    
+    // 请求AI讲解
+    $.ajax({
+        url: '/api/explain',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            chapter: currentChapter,
+            concept: concept,
+            type: type
+        })
+    })
+    .done(function(data) {
+        if (data.success) {
+            displayExplanation(data.explanation, data.from_cache);
+        } else {
+            showError('获取讲解失败: ' + data.error);
+        }
+    })
+    .fail(function() {
+        showError('网络错误，请稍后重试');
+    })
+    .always(function() {
+        $('#explanation-loading').hide();
+    });
+}
+
+function displayExplanation(explanation, fromCache) {
+    const content = $('#explanation-content');
+    const cacheIndicator = fromCache ?
+        '<small class="text-muted"><i class="fas fa-clock me-1"></i>来自缓存</small>' :
+        '<small class="text-success"><i class="fas fa-sparkles me-1"></i>AI新生成</small>';
+
+    // 处理增强格式的内容
+    const processedContent = processEnhancedContent(explanation);
+
+    content.html(`
+        <div class="mb-2">
+            <strong>${currentConcept}</strong>
+            <span class="ms-2">${cacheIndicator}</span>
+        </div>
+        <div class="explanation-content">${processedContent}</div>
+    `);
+
+    // 显示重新生成按钮
+    $('#regenerateBtn').show();
+
+    // 渲染Mermaid图表
+    renderMermaidDiagrams();
+
+    // 添加动画效果
+    content.hide().fadeIn(500);
+}
+
+function searchKnowledge() {
+    const keyword = $('#search-input').val().trim();
+    if (!keyword) {
+        showError('请输入搜索关键词');
+        return;
+    }
+    
+    $('#search-results').html(`
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">搜索中...</span>
+            </div>
+            <p class="mt-2">搜索中...</p>
+        </div>
+    `);
+    
+    $.get('/api/search', { keyword: keyword })
+        .done(function(data) {
+            if (data.success) {
+                displaySearchResults(data.results);
+            } else {
+                showError('搜索失败: ' + data.error);
+            }
+        })
+        .fail(function() {
+            showError('搜索失败，请稍后重试');
+        });
+}
+
+function displaySearchResults(results) {
+    const container = $('#search-results');
+    
+    if (results.length === 0) {
+        container.html(`
+            <div class="text-muted text-center">
+                <i class="fas fa-search fa-2x mb-2"></i>
+                <p>没有找到相关内容</p>
+            </div>
+        `);
+        return;
+    }
+    
+    let html = '<div class="list-group">';
+    results.forEach(result => {
+        const icon = result.type === 'concept' ? 'fas fa-lightbulb text-warning' : 'fas fa-book text-info';
+        html += `
+            <a href="#" class="list-group-item list-group-item-action search-result-item"
+               data-chapter="${result.chapter}" data-concept="${result.content}" data-type="${result.type}">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">
+                        <i class="${icon} me-2"></i>${result.content}
+                    </h6>
+                    <small class="text-muted">${result.chapter}</small>
+                </div>
+            </a>
+        `;
+    });
+    html += '</div>';
+    
+    container.html(html);
+    
+    // 绑定点击事件
+    $('.search-result-item').click(function(e) {
+        e.preventDefault();
+        const chapter = $(this).data('chapter');
+        const concept = $(this).data('concept');
+        const type = $(this).data('type');
+        
+        // 关闭搜索模态框
+        $('#searchModal').modal('hide');
+        
+        // 选择章节并解释概念
+        selectChapter(chapter);
+        setTimeout(() => {
+            explainConcept(concept, type);
+        }, 500);
+    });
+}
+
+function showError(message) {
+    $('#explanation-content').html(`
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>${message}
+        </div>
+    `);
+}
+
+function processEnhancedContent(content) {
+    // 处理增强格式的内容
+    let processedContent = content;
+
+    // 处理表格（简单的Markdown表格转HTML）
+    const tableRegex = /\|(.+)\|\n\|(-+\|)+\n((?:\|.+\|\n?)*)/g;
+    processedContent = processedContent.replace(tableRegex, function(match, header, separator, rows) {
+        const headerCells = header.split('|').map(cell => cell.trim()).filter(cell => cell);
+        const rowLines = rows.trim().split('\n');
+
+        let tableHtml = '<table class="table table-bordered table-striped">';
+
+        // 添加表头
+        if (headerCells.length > 0) {
+            tableHtml += '<thead><tr>';
+            headerCells.forEach(cell => {
+                tableHtml += `<th>${cell}</th>`;
+            });
+            tableHtml += '</tr></thead>';
+        }
+
+        // 添加表体
+        tableHtml += '<tbody>';
+        rowLines.forEach(row => {
+            if (row.trim()) {
+                const cells = row.split('|').map(cell => cell.trim()).filter(cell => cell);
+                if (cells.length > 0) {
+                    tableHtml += '<tr>';
+                    cells.forEach(cell => {
+                        tableHtml += `<td>${cell}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                }
+            }
+        });
+        tableHtml += '</tbody></table>';
+
+        return tableHtml;
+    });
+
+    // 处理标题
+    processedContent = processedContent.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    processedContent = processedContent.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+
+    // 处理列表
+    processedContent = processedContent.replace(/^- (.+)$/gm, '<li>$1</li>');
+    processedContent = processedContent.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>');
+
+    // 处理粗体
+    processedContent = processedContent.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+    // 处理代码块 - 先处理Mermaid，避免换行符被替换
+    const mermaidBlocks = [];
+    processedContent = processedContent.replace(/```mermaid\n([\s\S]*?)```/g, function(match, code) {
+        const placeholder = `__MERMAID_BLOCK_${mermaidBlocks.length}__`;
+        mermaidBlocks.push(code.trim());
+        return placeholder;
+    });
+
+    // 处理其他代码块
+    processedContent = processedContent.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, lang, code) {
+        return `<pre><code>${code.trim()}</code></pre>`;
+    });
+
+    // 处理行内代码
+    processedContent = processedContent.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // 处理换行
+    processedContent = processedContent.replace(/\n/g, '<br>');
+
+    // 恢复Mermaid块
+    mermaidBlocks.forEach((code, index) => {
+        const placeholder = `__MERMAID_BLOCK_${index}__`;
+        processedContent = processedContent.replace(placeholder, `<div class="mermaid">${code}</div>`);
+    });
+
+    return processedContent;
+}
+
+function renderMermaidDiagrams() {
+    // 初始化Mermaid
+    if (typeof mermaid !== 'undefined') {
+        try {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'default',
+                securityLevel: 'loose',
+                themeVariables: {
+                    primaryColor: '#007bff',
+                    primaryTextColor: '#495057',
+                    primaryBorderColor: '#dee2e6',
+                    lineColor: '#6c757d'
+                }
+            });
+
+            // 渲染所有Mermaid图表
+            const mermaidElements = document.querySelectorAll('.mermaid');
+            mermaidElements.forEach((element, index) => {
+                try {
+                    let graphDefinition = element.textContent.trim();
+
+                    // 验证图表定义不为空
+                    if (!graphDefinition) {
+                        element.innerHTML = `<div class="alert alert-info">暂无流程图</div>`;
+                        return;
+                    }
+
+                    // 清理可能的问题字符和格式
+                    graphDefinition = graphDefinition
+                        .replace(/[""]/g, '"')  // 统一引号
+                        .replace(/['']/g, "'")  // 统一单引号
+                        .replace(/[\u200B-\u200D\uFEFF]/g, '')  // 移除零宽字符
+                        .replace(/<br>/g, '\n')  // 将<br>转换回换行符
+                        .replace(/&nbsp;/g, ' ')  // 替换非断空格
+                        .replace(/&amp;/g, '&')  // 替换HTML实体
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>');
+
+                    // 确保图表定义以正确的语法开始
+                    if (!graphDefinition.match(/^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|journey|gitgraph|pie|gantt)/)) {
+                        console.warn('图表定义格式可能有问题:', graphDefinition.substring(0, 50));
+                    }
+
+                    // 验证基本的Mermaid语法
+                    const lines = graphDefinition.split('\n').filter(line => line.trim());
+                    if (lines.length === 0) {
+                        element.innerHTML = `<div class="alert alert-info">暂无流程图内容</div>`;
+                        return;
+                    }
+
+                    console.log('准备渲染图表:', graphDefinition.substring(0, 100) + '...');
+
+                    const graphId = `mermaid-graph-${index}-${Date.now()}`;
+
+                    // 使用Promise处理渲染
+                    mermaid.render(graphId, graphDefinition)
+                        .then(({svg}) => {
+                            console.log('Mermaid渲染成功');
+                            element.innerHTML = svg;
+                        })
+                        .catch(error => {
+                            console.error('Mermaid渲染错误:', error);
+                            console.error('图表定义:', graphDefinition);
+
+                            // 尝试提供更详细的错误信息
+                            let errorDetail = error.message || '未知错误';
+                            if (error.message && error.message.includes('Parse error')) {
+                                errorDetail += '<br><small>提示：可能是图表语法错误或包含特殊字符</small>';
+                            }
+
+                            element.innerHTML = `<div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                流程图渲染失败：${errorDetail}
+                                <details class="mt-2">
+                                    <summary>查看图表定义</summary>
+                                    <pre class="mt-2 small">${graphDefinition}</pre>
+                                </details>
+                            </div>`;
+                        });
+
+                } catch (error) {
+                    console.error('Mermaid元素处理错误:', error);
+                    element.innerHTML = `<div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        流程图处理失败：${error.message}
+                    </div>`;
+                }
+            });
+
+        } catch (error) {
+            console.error('Mermaid初始化错误:', error);
+        }
+    } else {
+        console.warn('Mermaid库未加载');
+    }
+}
+
+// 批量生成章节讲解
+function batchExplainChapter() {
+    if (!currentChapter) {
+        alert('请先选择一个章节');
+        return;
+    }
+
+    // 显示进度模态框
+    $('#batchProgressModal').modal('show');
+
+    // 重置进度
+    resetBatchProgress();
+    $('#progress-text').text(`正在批量生成章节: ${currentChapter}`);
+
+    // 发送批量生成请求
+    $.ajax({
+        url: '/api/batch-explain-chapter',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            chapter: currentChapter
+        })
+    })
+    .done(function(data) {
+        if (data.success) {
+            handleBatchResult(data);
+        } else {
+            showBatchError('批量生成失败: ' + data.error);
+        }
+    })
+    .fail(function() {
+        showBatchError('网络错误，请稍后重试');
+    });
+}
+
+// 批量生成全部讲解
+function batchExplainAll() {
+    if (!confirm('这将生成所有章节的所有概念和知识点讲解，可能需要较长时间。确定继续吗？')) {
+        return;
+    }
+
+    // 显示进度模态框
+    $('#batchProgressModal').modal('show');
+
+    // 重置进度
+    resetBatchProgress();
+    $('#progress-text').text('正在批量生成全部讲解...');
+
+    // 发送批量生成请求
+    $.ajax({
+        url: '/api/batch-explain-all',
+        method: 'POST',
+        contentType: 'application/json'
+    })
+    .done(function(data) {
+        if (data.success) {
+            handleBatchResult(data);
+        } else {
+            showBatchError('批量生成失败: ' + data.error);
+        }
+    })
+    .fail(function() {
+        showBatchError('网络错误，请稍后重试');
+    });
+}
+
+// 重新生成当前讲解
+function regenerateExplanation() {
+    if (!currentChapter || !currentConcept || !currentType) {
+        alert('请先选择一个概念或知识点');
+        return;
+    }
+
+    if (!confirm('确定要重新生成当前讲解吗？这将覆盖现有内容。')) {
+        return;
+    }
+
+    // 显示加载状态
+    $('#explanation-loading').show();
+    $('#regenerateBtn').hide();
+    $('#explanation-content').html(`
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">AI正在重新生成讲解...</span>
+            </div>
+            <p class="mt-2">AI正在重新生成讲解，请稍候...</p>
+        </div>
+    `);
+
+    // 发送重新生成请求
+    $.ajax({
+        url: '/api/regenerate-explain',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            chapter: currentChapter,
+            concept: currentConcept,
+            type: currentType
+        })
+    })
+    .done(function(data) {
+        if (data.success) {
+            displayExplanation(data.explanation, data.from_cache);
+        } else {
+            showError('重新生成失败: ' + data.error);
+        }
+    })
+    .fail(function() {
+        showError('网络错误，请稍后重试');
+    })
+    .always(function() {
+        $('#explanation-loading').hide();
+    });
+}
+
+// 重置批量进度
+function resetBatchProgress() {
+    $('#progress-bar').css('width', '0%');
+    $('#progress-percentage').text('0%');
+    $('#success-count').text('0');
+    $('#error-count').text('0');
+    $('#total-count').text('0');
+    $('#current-processing').html('<div class="text-muted">等待开始...</div>');
+    $('#batch-log').empty();
+    $('#batch-close-btn').prop('disabled', true);
+    $('#batch-cancel-btn').prop('disabled', false);
+}
+
+// 处理批量生成结果
+function handleBatchResult(data) {
+    $('#total-count').text(data.total);
+    $('#success-count').text(data.success_count);
+    $('#error-count').text(data.error_count);
+
+    const percentage = 100;
+    $('#progress-bar').css('width', percentage + '%');
+    $('#progress-percentage').text(percentage + '%');
+    $('#progress-text').text('批量生成完成');
+
+    $('#current-processing').html(`
+        <div class="text-success">
+            <i class="fas fa-check-circle me-2"></i>批量生成完成
+        </div>
+    `);
+
+    // 添加完成日志
+    $('#batch-log').append(`
+        <div class="alert alert-success">
+            <strong>批量生成完成！</strong><br>
+            成功生成: ${data.success_count} 个<br>
+            生成失败: ${data.error_count} 个<br>
+            总计: ${data.total} 个
+        </div>
+    `);
+
+    $('#batch-close-btn').prop('disabled', false);
+    $('#batch-cancel-btn').prop('disabled', true);
+
+    // 如果当前章节有更新，刷新概念列表
+    if (currentChapter) {
+        selectChapter(currentChapter);
+    }
+}
+
+// 显示批量生成错误
+function showBatchError(message) {
+    $('#current-processing').html(`
+        <div class="text-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>${message}
+        </div>
+    `);
+
+    $('#batch-log').append(`
+        <div class="alert alert-danger">
+            <strong>错误：</strong>${message}
+        </div>
+    `);
+
+    $('#batch-close-btn').prop('disabled', false);
+    $('#batch-cancel-btn').prop('disabled', true);
+}
+
+// 绑定批量进度模态框关闭事件
+$(document).ready(function() {
+    $('#batch-close-btn').click(function() {
+        $('#batchProgressModal').modal('hide');
+    });
+
+    $('#batch-cancel-btn').click(function() {
+        // 这里可以添加取消批量生成的逻辑
+        $('#batchProgressModal').modal('hide');
+    });
+});
+</script>
+{% endblock %}

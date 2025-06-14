@@ -1,10 +1,6 @@
-# 基础依赖
-tkinter  # 通常内置于Python
-requests>=2.25.1
-Pillow>=8.0.0
- 
-# Markdown支持
-markdown>=3.3.4
-
-# WebView支持
-pywebview>=3.6.3 
+# Flask Web应用依赖
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-CORS==4.0.0
+requests==2.31.0
+Werkzeug==2.3.7

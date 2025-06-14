@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}考试 - 数据库学习系统{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-edit me-2"></i>智能考试</h2>
+            <button class="btn btn-outline-secondary btn-sm" onclick="showExamHistory()">
+                <i class="fas fa-history me-1"></i>考试历史
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 考试设置 -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>考试设置</h6>
+            </div>
+            <div class="card-body">
+                <!-- 章节选择 -->
+                <div class="mb-3">
+                    <label class="form-label"><strong>选择章节</strong></label>
+                    <div class="form-check-container" style="max-height: 200px; overflow-y: auto;">
+                        {% for chapter in chapters %}
+                        <div class="form-check">
+                            <input class="form-check-input chapter-checkbox" type="checkbox" 
+                                   value="{{ chapter }}" id="chapter-{{ loop.index }}">
+                            <label class="form-check-label" for="chapter-{{ loop.index }}">
+                                <small>{{ chapter }}</small>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllChapters()">全选</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAllChapters()">清空</button>
+                    </div>
+                </div>
+
+                <!-- 题型选择 -->
+                <div class="mb-3">
+                    <label class="form-label"><strong>选择题型</strong></label>
+                    {% for qtype in question_types %}
+                    <div class="form-check">
+                        <input class="form-check-input qtype-checkbox" type="checkbox" 
+                               value="{{ qtype['题型名称'] }}" id="qtype-{{ loop.index }}" checked>
+                        <label class="form-check-label" for="qtype-{{ loop.index }}">
+                            {{ qtype['题型名称'] }} 
+                            <small class="text-muted">({{ qtype['题量'] }}题, {{ qtype['总分'] }}分)</small>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- AI生成选项 -->
+                <div class="mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="use-ai" checked>
+                        <label class="form-check-label" for="use-ai">
+                            <strong>使用AI生成题目</strong>
+                            <br><small class="text-muted">关闭后将生成基础试卷模板</small>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-primary" onclick="generateExam()" id="generate-btn">
+                        <i class="fas fa-magic me-2"></i>生成试卷
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 试卷预览 -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>试卷预览</h6>
+                <div>
+                    <button type="button" class="btn btn-sm btn-success" onclick="downloadExam()" 
+                            id="download-btn" style="display: none;">
+                        <i class="fas fa-download me-1"></i>下载试卷
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="exam-preview">
+                    <div class="text-muted text-center">
+                        <i class="fas fa-file-alt fa-3x mb-3"></i>
+                        <p>选择章节和题型，然后点击"生成试卷"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 考试历史模态框 -->
+<div class="modal fade" id="historyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">考试历史</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="history-content">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentExamId = null;
+
+function selectAllChapters() {
+    $('.chapter-checkbox').prop('checked', true);
+}
+
+function clearAllChapters() {
+    $('.chapter-checkbox').prop('checked', false);
+}
+
+function generateExam() {
+    // 获取选中的章节
+    const selectedChapters = [];
+    $('.chapter-checkbox:checked').each(function() {
+        selectedChapters.push($(this).val());
+    });
+
+    if (selectedChapters.length === 0) {
+        showAlert('请至少选择一个章节', 'warning');
+        return;
+    }
+
+    // 获取选中的题型
+    const selectedTypes = [];
+    $('.qtype-checkbox:checked').each(function() {
+        selectedTypes.push($(this).val());
+    });
+
+    if (selectedTypes.length === 0) {
+        showAlert('请至少选择一种题型', 'warning');
+        return;
+    }
+
+    const useAI = $('#use-ai').is(':checked');
+
+    // 显示加载状态
+    const generateBtn = $('#generate-btn');
+    const originalText = generateBtn.html();
+    generateBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>生成中...');
+
+    $('#exam-preview').html(`
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">生成中...</span>
+            </div>
+            <p class="mt-2">${useAI ? 'AI正在生成试卷，请稍候...' : '正在生成试卷模板...'}</p>
+        </div>
+    `);
+
+    // 发送生成请求
+    $.ajax({
+        url: '/api/generate-exam',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            chapters: selectedChapters,
+            question_types: selectedTypes,
+            use_ai: useAI
+        })
+    })
+    .done(function(data) {
+        if (data.success) {
+            currentExamId = data.exam_id;
+            displayExamPreview(data.formatted_paper);
+            $('#download-btn').show();
+            showAlert('试卷生成成功！', 'success');
+        } else {
+            showAlert('生成失败: ' + data.error, 'danger');
+        }
+    })
+    .fail(function(xhr) {
+        const error = xhr.responseJSON ? xhr.responseJSON.error : '网络错误';
+        showAlert('生成失败: ' + error, 'danger');
+    })
+    .always(function() {
+        generateBtn.prop('disabled', false).html(originalText);
+    });
+}
+
+function displayExamPreview(formattedPaper) {
+    $('#exam-preview').html(`
+        <div class="exam-paper">
+            <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px;">${formattedPaper}</pre>
+        </div>
+    `);
+}
+
+function downloadExam() {
+    if (!currentExamId) {
+        showAlert('没有可下载的试卷', 'warning');
+        return;
+    }
+
+    // 创建下载链接
+    const downloadUrl = `/api/download-exam/${currentExamId}`;
+    
+    // 显示下载状态
+    const downloadBtn = $('#download-btn');
+    const originalText = downloadBtn.html();
+    downloadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>准备下载...');
+
+    // 创建隐藏的下载链接
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `exam_${currentExamId}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // 恢复按钮状态
+    setTimeout(() => {
+        downloadBtn.prop('disabled', false).html(originalText);
+        showAlert('试卷下载完成！', 'success');
+    }, 1000);
+}
+
+function showExamHistory() {
+    $('#historyModal').modal('show');
+    
+    // 加载考试历史
+    $.get('/api/exam-history')
+        .done(function(data) {
+            if (data.success) {
+                displayExamHistory(data.history);
+            } else {
+                $('#history-content').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>加载失败: ${data.error}
+                    </div>
+                `);
+            }
+        })
+        .fail(function() {
+            $('#history-content').html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>网络错误，请稍后重试
+                </div>
+            `);
+        });
+}
+
+function displayExamHistory(history) {
+    if (history.length === 0) {
+        $('#history-content').html(`
+            <div class="text-muted text-center">
+                <i class="fas fa-file-alt fa-3x mb-3"></i>
+                <p>暂无考试历史</p>
+            </div>
+        `);
+        return;
+    }
+
+    let html = '<div class="list-group">';
+    history.forEach(exam => {
+        const chapters = JSON.parse(exam.chapters);
+        const date = new Date(exam.created_at).toLocaleString();
+        
+        html += `
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${exam.exam_name}</h6>
+                    <small class="text-muted">${date}</small>
+                </div>
+                <p class="mb-1">
+                    <strong>章节:</strong> ${chapters.join(', ')}
+                </p>
+                <small class="text-muted">
+                    状态: ${exam.status === 'generated' ? '已生成' : '已完成'}
+                    ${exam.score ? ` | 得分: ${exam.score}分` : ''}
+                </small>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    $('#history-content').html(html);
+}
+
+function showAlert(message, type) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // 移除现有的alert
+    $('.alert').remove();
+    
+    // 添加新的alert到页面顶部
+    $('main').prepend(alertHtml);
+    
+    // 自动消失
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock %}
