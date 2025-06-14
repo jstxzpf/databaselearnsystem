@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}首页 - 数据库学习系统{% endblock %}
+{% block title %}首页 - 通用智能学习系统{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -9,11 +9,11 @@
         <div class="jumbotron bg-primary text-white rounded p-5 mb-4">
             <div class="container">
                 <h1 class="display-4">
-                    <i class="fas fa-database me-3"></i>数据库学习系统
+                    <i class="fas fa-graduation-cap me-3"></i>通用智能学习系统
                 </h1>
-                <p class="lead">基于AI的智能数据库原理学习平台</p>
+                <p class="lead">基于AI的智能多学科学习平台</p>
                 <hr class="my-4" style="border-color: rgba(255,255,255,0.3);">
-                <p>通过AI辅助学习数据库概念，智能生成考试试卷，自动批改试卷并提供学习建议</p>
+                <p>通过AI辅助学习各学科知识点，智能生成考试试卷，自动批改试卷并提供学习建议</p>
                 <a class="btn btn-light btn-lg" href="{{ url_for('main.learning_page') }}" role="button">
                     <i class="fas fa-play me-2"></i>开始学习
                 </a>
@@ -32,7 +32,7 @@
                 </div>
                 <h5 class="card-title">智能学习</h5>
                 <p class="card-text">
-                    按章节浏览数据库概念和知识点，通过AI获取详细讲解和实例演示
+                    按章节浏览各学科概念和知识点，通过AI获取详细讲解和实例演示
                 </p>
                 <a href="{{ url_for('main.learning_page') }}" class="btn btn-primary">
                     <i class="fas fa-arrow-right me-1"></i>进入学习

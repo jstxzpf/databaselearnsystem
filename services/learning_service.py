@@ -66,6 +66,9 @@ class LearningService:
         try:
             current_app.logger.info(f"生成AI讲解: {chapter} - {concept}")
 
+            # 获取当前课程名称
+            current_course = self.settings_service.get_current_course()
+
             # 首先尝试从缓存加载
             cached_explanation = self._load_explanation_cache(chapter, concept, concept_type)
             if cached_explanation:
@@ -78,7 +81,7 @@ class LearningService:
 
             # 缓存中没有，生成新的讲解
             try:
-                explanation = self.ai_service.generate_explanation(chapter, concept, concept_type)
+                explanation = self.ai_service.generate_explanation(chapter, concept, concept_type, current_course)
             except NameError as ne:
                 current_app.logger.error(f"NameError in AI service: {str(ne)}")
                 return {
@@ -187,9 +190,13 @@ class LearningService:
                         'percentage': round((current / total) * 100, 1)
                     })
 
+            # 获取当前课程名称
+            current_course = self.settings_service.get_current_course()
+
             results = self.ai_service.batch_generate_explanations(
                 concepts_to_generate,
-                batch_progress_callback
+                batch_progress_callback,
+                current_course
             )
 
             # 保存成功生成的讲解到缓存
@@ -345,9 +352,13 @@ class LearningService:
                         'percentage': round((current / total) * 100, 1)
                     })
 
+            # 获取当前课程名称
+            current_course = self.settings_service.get_current_course()
+
             results = self.ai_service.batch_generate_explanations(
                 all_concepts_to_generate,
-                batch_progress_callback
+                batch_progress_callback,
+                current_course
             )
 
             # 保存成功生成的讲解到缓存
@@ -389,8 +400,11 @@ class LearningService:
             # 删除现有缓存
             self._delete_explanation_cache(chapter, concept, concept_type)
 
+            # 获取当前课程名称
+            current_course = self.settings_service.get_current_course()
+
             # 重新生成
-            explanation = self.ai_service.generate_explanation(chapter, concept, concept_type)
+            explanation = self.ai_service.generate_explanation(chapter, concept, concept_type, current_course)
 
             if not explanation or explanation.startswith("抱歉") or explanation.startswith("无法连接"):
                 return {

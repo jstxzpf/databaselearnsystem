@@ -129,13 +129,19 @@ class ExamService:
                 # 使用AI生成题目
                 generated_questions = []
 
+                # 获取当前课程名称
+                from services.settings_service import SettingsService
+                settings_service = SettingsService()
+                current_course = settings_service.get_current_course()
+
                 for section in exam_paper['questions']:
                     current_app.logger.info(f"生成{section['type_name']}题目")
 
                     questions_text = self.ai_service.generate_questions(
                         section['type_name'],
                         chapters,
-                        section['count']
+                        section['count'],
+                        current_course
                     )
 
                     if questions_text and not questions_text.startswith("抱歉"):

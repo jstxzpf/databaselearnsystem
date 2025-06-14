@@ -18,6 +18,8 @@ class ReviewService:
     def __init__(self):
         self.ai_service = AIService()
         self.knowledge_base = KnowledgeBase()
+        from services.settings_service import SettingsService
+        self.settings_service = SettingsService()
     
     def upload_exam_file(self, username, file):
         """上传试卷文件"""
@@ -172,21 +174,24 @@ class ReviewService:
             # 获取相关知识背景
             knowledge_context = self._get_knowledge_context()
             
+            # 获取当前课程名称
+            current_course = self.settings_service.get_current_course()
+
             # 调用AI进行批改
             current_app.logger.info("开始AI批改试卷")
-            review_result = self.ai_service.review_answers(content, knowledge_context)
-            
+            review_result = self.ai_service.review_answers(content, knowledge_context, current_course)
+
             if not review_result or review_result.startswith("抱歉"):
                 return {
                     'success': False,
                     'error': review_result or "AI批改服务暂时不可用"
                 }
-            
+
             # 分析薄弱环节
             weak_points = self._analyze_weak_points(review_result)
-            
+
             # 生成学习建议
-            suggestions = self.ai_service.get_learning_advice(weak_points, knowledge_context)
+            suggestions = self.ai_service.get_learning_advice(weak_points, knowledge_context, current_course)
             
             # 更新审批记录
             review_record.review_result = review_result

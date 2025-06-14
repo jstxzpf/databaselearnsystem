@@ -157,15 +157,15 @@ class AIService:
             current_app.logger.warning(f"最终安全检查时出错: {str(e)}")
             return content
 
-    def generate_explanation(self, chapter, concept, concept_type):
+    def generate_explanation(self, chapter, concept, concept_type, course_name="数据库原理"):
         """生成概念讲解"""
         # 智能判断是否需要包含表格和流程图
         needs_table, needs_flowchart = self._analyze_content_needs(concept, concept_type)
 
         if concept_type == 'concept':
-            prompt = self._build_concept_prompt(chapter, concept, needs_table, needs_flowchart)
+            prompt = self._build_concept_prompt(chapter, concept, needs_table, needs_flowchart, course_name)
         else:  # content
-            prompt = self._build_content_prompt(chapter, concept, needs_table, needs_flowchart)
+            prompt = self._build_content_prompt(chapter, concept, needs_table, needs_flowchart, course_name)
 
         return self._make_request(prompt, max_tokens=4000)
 
@@ -208,15 +208,16 @@ class AIService:
 
         return needs_table, needs_flowchart
 
-    def _build_concept_prompt(self, chapter, concept, needs_table, needs_flowchart):
+    def _build_concept_prompt(self, chapter, concept, needs_table, needs_flowchart, course_name="数据库原理"):
         """构建概念讲解提示词"""
         base_sections = [
             "## 1. 概念定义\n给出准确、简洁的定义",
-            "## 2. 详细解释\n深入解释概念的含义和重要性"
+            "## 2. 概念解释\n使用通俗易懂的语言解释这个概念，让初学者也能理解其核心含义和重要性",
+            "## 3. 详细解释\n深入解释概念的含义和重要性"
         ]
 
         if needs_table:
-            base_sections.append("""## 3. 核心特点
+            base_sections.append("""## 4. 核心特点
 使用表格形式列出主要特点：
 | 特点 | 说明 | 重要性 |
 |------|------|--------|
@@ -224,7 +225,7 @@ class AIService:
 | 特点2 | 详细说明 | 重要程度 |""")
 
         if needs_flowchart:
-            base_sections.append("""## 4. 工作原理/流程
+            base_sections.append("""## 5. 工作原理/流程
 使用Mermaid流程图语法描述相关流程：
 ```mermaid
 graph TD
@@ -238,16 +239,21 @@ graph TD
 注意：节点标签如果包含中文，请用双引号包围。""")
 
         base_sections.extend([
-            "## 5. 实际应用\n- 应用场景1：具体说明\n- 应用场景2：具体说明",
-            "## 6. 学习要点\n- 重点1：详细说明\n- 重点2：详细说明"
+            "## 6. 实际应用\n- 应用场景1：具体说明\n- 应用场景2：具体说明",
+            "## 7. 学习要点\n- 重点1：详细说明\n- 重点2：详细说明"
         ])
 
         sections_text = "\n\n".join(base_sections)
 
-        return f"""作为数据库原理课程的专业教师，请详细解释以下概念：
+        # 根据课程类型调整语气风格
+        course_style = self._get_course_style(course_name)
+
+        return f"""作为{course_name}课程的专业教师，请详细解释以下概念：
 
 章节：{chapter}
 概念：{concept}
+
+{course_style}
 
 请按以下格式回答：
 
@@ -257,15 +263,16 @@ graph TD
 注意：在Mermaid流程图中，如果节点标签包含中文，请用双引号包围，例如：A["中文标签"]。
 """
 
-    def _build_content_prompt(self, chapter, concept, needs_table, needs_flowchart):
+    def _build_content_prompt(self, chapter, concept, needs_table, needs_flowchart, course_name="数据库原理"):
         """构建知识点讲解提示词"""
         base_sections = [
             "## 1. 知识点概述\n简要说明这个知识点的重要性和在整个课程中的地位",
-            "## 2. 详细原理\n深入解释相关原理和方法"
+            "## 2. 概念解释\n使用通俗易懂的语言解释相关的核心概念，确保初学者能够理解",
+            "## 3. 详细原理\n深入解释相关原理和方法"
         ]
 
         if needs_table:
-            base_sections.append("""## 3. 关键要素对比
+            base_sections.append("""## 4. 关键要素对比
 使用表格形式对比相关要素：
 | 要素 | 特征 | 优点 | 缺点 | 适用场景 |
 |------|------|------|------|----------|
@@ -273,7 +280,7 @@ graph TD
 | 要素2 | 特征描述 | 优点说明 | 缺点说明 | 场景说明 |""")
 
         if needs_flowchart:
-            base_sections.append("""## 4. 操作流程
+            base_sections.append("""## 5. 操作流程
 使用Mermaid流程图描述操作或处理流程：
 ```mermaid
 graph TD
@@ -287,16 +294,21 @@ graph TD
 注意：节点标签如果包含中文，请用双引号包围。""")
 
         base_sections.extend([
-            "## 5. 实例演示\n提供具体的例子或代码示例，包含：\n- 示例背景\n- 具体实现\n- 结果分析",
-            "## 6. 学习建议\n- 重点掌握：关键概念和方法\n- 实践练习：具体练习建议\n- 扩展阅读：相关资料推荐"
+            "## 6. 实例演示\n提供具体的例子或代码示例，包含：\n- 示例背景\n- 具体实现\n- 结果分析",
+            "## 7. 学习建议\n- 重点掌握：关键概念和方法\n- 实践练习：具体练习建议\n- 扩展阅读：相关资料推荐"
         ])
 
         sections_text = "\n\n".join(base_sections)
 
-        return f"""作为数据库原理课程的专业教师，请详细讲解以下知识点：
+        # 根据课程类型调整语气风格
+        course_style = self._get_course_style(course_name)
+
+        return f"""作为{course_name}课程的专业教师，请详细讲解以下知识点：
 
 章节：{chapter}
 知识点：{concept}
+
+{course_style}
 
 请按以下格式回答：
 
@@ -305,16 +317,49 @@ graph TD
 请用中文回答，确保内容准确、详细且易于理解。
 注意：在Mermaid流程图中，如果节点标签包含中文，请用双引号包围，例如：A["中文标签"]。
 """
-    
-    def generate_questions(self, question_type, chapters, count=1):
+
+    def _get_course_style(self, course_name):
+        """根据课程类型获取相应的语气风格"""
+        course_styles = {
+            "数据库原理": "请采用严谨、逻辑性强的学术风格，注重理论基础和实际应用的结合。",
+            "编程": "请采用实用、循序渐进的教学风格，多提供代码示例和实践指导。",
+            "算法": "请采用逻辑清晰、步骤明确的解释风格，注重思维过程的展示。",
+            "数据结构": "请采用图解丰富、概念清晰的教学风格，多使用可视化说明。",
+            "计算机网络": "请采用层次分明、协议导向的解释风格，注重实际网络场景。",
+            "操作系统": "请采用系统性、机制导向的教学风格，注重原理和实现的结合。",
+            "软件工程": "请采用实践导向、工程化的教学风格，注重方法论和最佳实践。",
+            "人工智能": "请采用前沿性、应用导向的教学风格，结合最新发展和实际案例。",
+            "机器学习": "请采用数学严谨、实验导向的教学风格，注重理论推导和实践验证。",
+            "数学": "请采用严谨、证明导向的学术风格，注重逻辑推理和定理应用。",
+            "物理": "请采用现象导向、实验结合的教学风格，注重物理直觉和数学描述。",
+            "化学": "请采用反应机理、实验导向的教学风格，注重化学原理和实际应用。",
+            "生物": "请采用生命现象、系统性的教学风格，注重结构功能关系。"
+        }
+
+        # 默认风格
+        default_style = "请采用通俗易懂、循序渐进的教学风格，确保内容既准确又易于理解。"
+
+        # 模糊匹配课程名称
+        for key, style in course_styles.items():
+            if key in course_name or course_name in key:
+                return style
+
+        return default_style
+
+    def generate_questions(self, question_type, chapters, count=1, course_name="数据库原理"):
         """生成考试题目"""
         chapters_str = "、".join(chapters)
         
+        # 根据课程类型调整语气风格
+        course_style = self._get_course_style(course_name)
+
         prompt = f"""
-作为数据库原理课程的专业教师，请为以下章节生成{question_type}：
+作为{course_name}课程的专业教师，请为以下章节生成{question_type}：
 
 考试章节：{chapters_str}
 题目数量：{count}题
+
+{course_style}
 
 请严格按照以下要求：
 1. 题目必须来自指定章节的内容
@@ -328,15 +373,20 @@ graph TD
         
         return self._make_request(prompt, max_tokens=3000)
     
-    def review_answers(self, questions_and_answers, knowledge_context=""):
+    def review_answers(self, questions_and_answers, knowledge_context="", course_name="数据库原理"):
         """批改试卷答案"""
+        # 根据课程类型调整语气风格
+        course_style = self._get_course_style(course_name)
+
         prompt = f"""
-作为数据库原理课程的专业教师，请批改以下试卷：
+作为{course_name}课程的专业教师，请批改以下试卷：
 
 {questions_and_answers}
 
 知识背景：
 {knowledge_context}
+
+{course_style}
 
 请按以下格式给出批改结果：
 1. 逐题批改：对每道题给出分数和评语
@@ -346,16 +396,21 @@ graph TD
 
 请用中文回答，评价要客观、建设性。
 """
-        
+
         return self._make_request(prompt, max_tokens=3000)
     
-    def get_learning_advice(self, weak_points, chapter_context=""):
+    def get_learning_advice(self, weak_points, chapter_context="", course_name="数据库原理"):
         """生成学习建议"""
+        # 根据课程类型调整语气风格
+        course_style = self._get_course_style(course_name)
+
         prompt = f"""
-作为数据库原理课程的专业教师，请为学生提供学习建议：
+作为{course_name}课程的专业教师，请为学生提供学习建议：
 
 薄弱知识点：{weak_points}
 相关章节：{chapter_context}
+
+{course_style}
 
 请提供：
 1. 重点复习内容
@@ -365,10 +420,10 @@ graph TD
 
 请用中文回答，建议要具体、可操作。
 """
-        
+
         return self._make_request(prompt)
 
-    def batch_generate_explanations(self, chapter_concepts, progress_callback=None):
+    def batch_generate_explanations(self, chapter_concepts, progress_callback=None, course_name="数据库原理"):
         """批量生成讲解"""
         results = {}
         total = len(chapter_concepts)
@@ -378,7 +433,7 @@ graph TD
                 current_app.logger.info(f"批量生成 {i+1}/{total}: {chapter} - {concept}")
 
                 # 生成讲解
-                explanation = self.generate_explanation(chapter, concept, concept_type)
+                explanation = self.generate_explanation(chapter, concept, concept_type, course_name)
 
                 if explanation and not explanation.startswith("抱歉") and not explanation.startswith("无法连接"):
                     results[f"{chapter}_{concept}"] = {
