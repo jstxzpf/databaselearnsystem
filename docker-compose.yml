@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Flask应用服务
+  database-learning-system:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: db-learning-app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # Flask配置
+      - FLASK_ENV=production
+      - FLASK_CONFIG=production
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      
+      # 数据库配置
+      - DATABASE_URL=sqlite:///data/database.db
+      
+      # Ollama API配置 (连接到宿主机或其他容器)
+      - OLLAMA_API_URL=${OLLAMA_API_URL:-http://host.docker.internal:11434/api/chat}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen3:14b}
+      
+      # 其他配置
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Shanghai
+    
+    volumes:
+      # 数据持久化
+      - ./data:/app/data
+      - ./static/uploads:/app/static/uploads
+      - ./logs:/app/logs
+      
+      # 配置文件挂载（可选）
+      - ./kownlgebase.json:/app/kownlgebase.json:ro
+      - ./testmodel.json:/app/testmodel.json:ro
+    
+    networks:
+      - db-learning-network
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # 依赖关系（如果有其他服务）
+    depends_on: []
+    
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+networks:
+  db-learning-network:
+    driver: bridge
+    name: db-learning-network
+
+# 可选：如果需要单独的数据卷
+volumes:
+  db_data:
+    driver: local
+  uploads_data:
+    driver: local
+  logs_data:
+    driver: local

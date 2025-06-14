@@ -1,0 +1,98 @@
+# Docker构建忽略文件
+# 优化构建过程，减少镜像大小
+
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv/
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git文件
+.git/
+.gitignore
+.gitattributes
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+.cache/
+
+# 测试文件
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# 文档
+*.md
+docs/
+
+# 部署脚本
+deploy.sh
+deploy.bat
+start_dev.bat
+start_dev.ps1
+
+# Docker文件
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# 开发配置
+.env
+.env.local
+.env.development
+.env.test
+
+# 数据库文件（在容器中重新创建）
+data/database.db
+
+# 上传文件（通过卷挂载）
+static/uploads/*
+
+# 备份文件
+*.bak
+*.backup

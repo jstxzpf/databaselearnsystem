@@ -1,10 +1,9 @@
 """
 路由定义 - 数据库学习系统
 """
-from flask import Blueprint, render_template, request, jsonify, session, send_file, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, session, send_file
 from services import LearningService, ExamService, ReviewService, SettingsService, CourseService
-from models.knowledge import KnowledgeBase
-from models.course import Course
+from datetime import datetime
 import os
 
 # 创建蓝图
@@ -493,6 +492,53 @@ def delete_course(course_name):
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@api_bp.route('/health')
+def health_check():
+    """健康检查端点 - 用于Docker健康检查"""
+    try:
+        # 检查基本服务状态
+        from flask import current_app
+
+        # 检查数据库连接
+        from app import db
+        with db.engine.connect() as connection:
+            connection.execute(db.text('SELECT 1'))
+
+        # 检查必要文件
+        required_files = [
+            current_app.config.get('KNOWLEDGE_BASE_FILE', 'kownlgebase.json'),
+            current_app.config.get('TEST_MODEL_FILE', 'testmodel.json')
+        ]
+
+        missing_files = []
+        for file in required_files:
+            if not os.path.exists(file):
+                missing_files.append(file)
+
+        # 检查数据目录
+        data_dir = 'data'
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir, exist_ok=True)
+
+        status = {
+            'status': 'healthy',
+            'database': 'connected',
+            'files': {
+                'missing': missing_files,
+                'status': 'ok' if not missing_files else 'warning'
+            },
+            'timestamp': str(datetime.now())
+        }
+
+        return jsonify(status), 200
+
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'error': str(e),
+            'timestamp': str(datetime.now())
+        }), 503
 
 @api_bp.route('/courses/current')
 def get_current_course():

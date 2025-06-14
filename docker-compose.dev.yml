@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Flask应用服务 - 开发模式
+  database-learning-system-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: db-learning-app-dev
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      # Flask配置 - 开发模式
+      - FLASK_ENV=development
+      - FLASK_CONFIG=development
+      - FLASK_DEBUG=1
+      - SECRET_KEY=dev-secret-key
+      
+      # 数据库配置
+      - DATABASE_URL=sqlite:///data/database.db
+      
+      # Ollama API配置
+      - OLLAMA_API_URL=${OLLAMA_API_URL:-http://host.docker.internal:11434/api/chat}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen3:14b}
+      
+      # 开发配置
+      - PYTHONUNBUFFERED=1
+      - TZ=Asia/Shanghai
+    
+    volumes:
+      # 代码热重载
+      - .:/app
+      - /app/__pycache__
+      - /app/.git
+      
+      # 数据持久化
+      - ./data:/app/data
+      - ./static/uploads:/app/static/uploads
+      - ./logs:/app/logs
+    
+    networks:
+      - db-learning-dev-network
+    
+    # 开发模式启动命令
+    command: ["python", "run.py"]
+    
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  db-learning-dev-network:
+    driver: bridge
+    name: db-learning-dev-network
