@@ -1,7 +1,7 @@
 {
   "ollama_api_url": "http://127.0.0.1:11434/api/chat",
   "ollama_model": "gemma3:12b-it-q4_K_M",
-  "current_course": "统计执法证考试之统计实务",
+  "current_course": "数据库原理",
   "created_at": "2024-01-01T00:00:00",
-  "updated_at": "2025-06-14T15:30:07.951112"
+  "updated_at": "2025-08-03T07:41:38.015419"
 }
