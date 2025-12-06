@@ -183,6 +183,26 @@ class ExamService:
     
     def _parse_generated_questions(self, questions_text):
         """解析AI生成的题目"""
+        try:
+            # 尝试解析JSON
+            import json
+            import re
+            
+            # 清理可能存在的代码块标记
+            cleaned_text = re.sub(r'```json\s*', '', questions_text)
+            cleaned_text = re.sub(r'```\s*$', '', cleaned_text)
+            cleaned_text = cleaned_text.strip()
+            
+            questions = json.loads(cleaned_text)
+            if isinstance(questions, list):
+                return questions
+            
+            # 如果不是列表，可能解析错误，回退到普通文本处理
+            current_app.logger.warning(f"解析结果不是列表: {type(questions)}")
+        except Exception as e:
+            current_app.logger.warning(f"JSON解析失败，回退到文本模式: {e}")
+        
+        # 回退逻辑：普通文本解析
         questions = []
         lines = questions_text.strip().split('\n')
         current_question = ""

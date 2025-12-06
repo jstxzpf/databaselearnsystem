@@ -189,7 +189,8 @@ function generateExam() {
     .done(function(data) {
         if (data.success) {
             currentExamId = data.exam_id;
-            displayExamPreview(data.formatted_paper);
+            // 优先使用结构化数据渲染
+            displayExamPreview(data.exam_paper, data.formatted_paper);
             $('#download-btn').show();
             showAlert('试卷生成成功！', 'success');
         } else {
@@ -205,7 +206,97 @@ function generateExam() {
     });
 }
 
-function displayExamPreview(formattedPaper) {
+function displayExamPreview(examPaper, formattedPaper) {
+    // 检查是否有生成的题目数据
+    if (!examPaper.generated_questions || examPaper.generated_questions.length === 0) {
+        // Fallback to text display if no structured data
+        renderTextPreview(formattedPaper);
+        return;
+    }
+
+    let html = '<div class="exam-paper-form">';
+    let questionNum = 1;
+
+    examPaper.questions.forEach((section, sectionIndex) => {
+        html += `<h5 class="mt-4 mb-3 border-bottom pb-2">${section.type_name} <small class="text-muted">(${section.count}题，共${section.total_score}分)</small></h5>`;
+        
+        // 获取该部分的题目列表
+        const questions = examPaper.generated_questions[sectionIndex];
+        
+        if (questions && questions.length > 0) {
+            questions.forEach((q, qIndex) => {
+                // 判断是结构化对象还是旧字符串
+                if (typeof q === 'string') {
+                    html += `
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">第${questionNum}题</h6>
+                                <p class="card-text" style="white-space: pre-wrap;">${q}</p>
+                            </div>
+                        </div>`;
+                } else {
+                    // 结构化题目
+                    html += `
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="card-title">第${questionNum}题</h6>
+                                    <button class="btn btn-sm btn-outline-info toggle-answer" data-target="#answer-${sectionIndex}-${qIndex}">
+                                        <i class="fas fa-eye me-1"></i>查看答案
+                                    </button>
+                                </div>
+                                <p class="card-text lead fs-6 mb-3">${q.content}</p>
+                                
+                                <div class="options-area mb-3">
+                                    ${renderOptions(q, sectionIndex, qIndex)}
+                                </div>
+
+                                <div class="collapse mt-3 bg-light p-3 rounded" id="answer-${sectionIndex}-${qIndex}">
+                                    <p class="mb-1"><strong>正确答案：</strong> <span class="text-success fw-bold">${q.answer || '无'}</span></p>
+                                    <p class="mb-0"><strong>解析：</strong> ${q.analysis || '暂无解析'}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+                questionNum++;
+            });
+        } else {
+            html += '<p class="text-muted">暂无题目</p>';
+        }
+    });
+
+    html += '</div>';
+    $('#exam-preview').html(html);
+
+    // 绑定显示答案事件
+    $('.toggle-answer').click(function() {
+        const targetId = $(this).data('target');
+        $(targetId).collapse('toggle');
+    });
+}
+
+function renderOptions(question, sectionIndex, questionIndex) {
+    if (!question.options || question.options.length === 0) {
+        // 主观题，显示文本框供输入
+        return `<textarea class="form-control" rows="3" placeholder="请输入你的答案..."></textarea>`;
+    }
+
+    // 选择题，显示选项
+    let html = '<div class="list-group">';
+    question.options.forEach((opt, idx) => {
+        const optId = `opt-${sectionIndex}-${questionIndex}-${idx}`;
+        html += `
+            <label class="list-group-item list-group-item-action">
+                <input class="form-check-input me-1" type="radio" name="q-${sectionIndex}-${questionIndex}" value="${opt}" id="${optId}">
+                ${opt}
+            </label>
+        `;
+    });
+    html += '</div>';
+    return html;
+}
+
+function renderTextPreview(formattedPaper) {
     $('#exam-preview').html(`
         <div class="exam-paper">
             <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px;">${formattedPaper}</pre>

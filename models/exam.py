@@ -95,7 +95,7 @@ class ExamModel:
     def format_exam_paper(self, exam_paper, generated_questions=None):
         """格式化试卷为文本"""
         lines = []
-        lines.append("数据库系统考试试卷")
+        lines.append("通用学习系统考试试卷")
         lines.append("=" * 50)
         lines.append(f"考试时间: {datetime.now().strftime('%Y年%m月%d日')}")
         lines.append(f"考试章节: {', '.join(exam_paper['chapters'])}")
@@ -104,6 +104,8 @@ class ExamModel:
         total_score = 0
         question_num = 1
         
+        all_answers = []  # 收集所有答案
+        
         for i, section in enumerate(exam_paper['questions']):
             lines.append(f"{section['type_name']} (共{section['count']}题，{section['total_score']}分)")
             lines.append(f"考查重点: {section['focus']}")
@@ -111,12 +113,34 @@ class ExamModel:
                 lines.append(f"答题要求: {section['requirements']}")
             lines.append("")
             
+            section_answers = []
+            
             # 如果有生成的题目，使用生成的题目
             if generated_questions and i < len(generated_questions):
                 questions = generated_questions[i]
                 for q in questions:
-                    lines.append(f"{question_num}. {q}")
-                    lines.append("")
+                    if isinstance(q, dict):
+                        # 结构化题目
+                        lines.append(f"{question_num}. {q.get('content', '')}")
+                        
+                        # 选项
+                        if q.get('options'):
+                            for opt in q['options']:
+                                lines.append(f"    {opt}")
+                        
+                        lines.append("")
+                        
+                        # 收集答案
+                        ans = q.get('answer', '无答案')
+                        analysis = q.get('analysis', '')
+                        section_answers.append(f"{question_num}. {ans}\n   解析: {analysis}")
+                        
+                    else:
+                        # 旧文本格式
+                        lines.append(f"{question_num}. {q}")
+                        lines.append("")
+                        section_answers.append(f"{question_num}. (见题目描述)")
+                        
                     question_num += 1
             else:
                 # 否则显示占位符
@@ -125,10 +149,22 @@ class ExamModel:
                     lines.append("")
                     question_num += 1
             
+            all_answers.append((section['type_name'], section_answers))
+            
             total_score += section['total_score']
             lines.append("")
         
         lines.append(f"总分: {total_score}分")
         lines.append("=" * 50)
+        lines.append("")
+        lines.append("参考答案")
+        lines.append("-" * 30)
+        
+        for section_name, answers in all_answers:
+            if answers:
+                lines.append(f"【{section_name}】")
+                for ans in answers:
+                    lines.append(ans)
+                lines.append("")
         
         return "\n".join(lines)
