@@ -134,8 +134,8 @@ class LearningService:
                 'concepts_learned': 15,
                 'recent_activity': [
                     {
-                        'chapter': '第一章 数据库系统的世界(概述)',
-                        'concept': '数据库',
+                        'chapter': '第一章 课程概述',
+                        'concept': '基础概念',
                         'concept_type': 'concept',
                         'created_at': '2024-01-01T10:00:00'
                     }

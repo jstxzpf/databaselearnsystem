@@ -37,7 +37,11 @@ class ExamService:
             import os
 
             db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'database.db')
-            exam_name = f"数据库考试_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            # 获取当前课程名称
+            from services.settings_service import SettingsService
+            settings_service = SettingsService()
+            current_course = settings_service.get_current_course()
+            exam_name = f"{current_course}考试_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
             with sqlite3.connect(db_path) as conn:
                 cursor = conn.cursor()

@@ -234,7 +234,7 @@ class ReviewService:
             
             return "; ".join(context_parts)
         except:
-            return "数据库原理相关知识"
+            return "相关知识"
     
     def _analyze_weak_points(self, review_result):
         """分析薄弱环节"""

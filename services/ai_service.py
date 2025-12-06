@@ -152,7 +152,7 @@ class AIService:
             current_app.logger.warning(f"最终安全检查时出错: {str(e)}")
             return content
 
-    def generate_explanation(self, chapter, concept, concept_type, course_name="数据库原理"):
+    def generate_explanation(self, chapter, concept, concept_type, course_name="通用课程"):
         """生成概念讲解"""
         # 智能判断是否需要包含表格和流程图
         needs_table, needs_flowchart = self._analyze_content_needs(concept, concept_type)
@@ -203,7 +203,7 @@ class AIService:
 
         return needs_table, needs_flowchart
 
-    def _build_concept_prompt(self, chapter, concept, needs_table, needs_flowchart, course_name="数据库原理"):
+    def _build_concept_prompt(self, chapter, concept, needs_table, needs_flowchart, course_name="通用课程"):
         """构建概念讲解提示词"""
         base_sections = [
             "## 1. 概念定义\n给出准确、简洁的定义",
@@ -258,7 +258,7 @@ graph TD
 注意：在Mermaid流程图中，如果节点标签包含中文，请用双引号包围，例如：A["中文标签"]。
 """
 
-    def _build_content_prompt(self, chapter, concept, needs_table, needs_flowchart, course_name="数据库原理"):
+    def _build_content_prompt(self, chapter, concept, needs_table, needs_flowchart, course_name="通用课程"):
         """构建知识点讲解提示词"""
         base_sections = [
             "## 1. 知识点概述\n简要说明这个知识点的重要性和在整个课程中的地位",
@@ -341,7 +341,7 @@ graph TD
 
         return default_style
 
-    def generate_questions(self, question_type, chapters, count=1, course_name="数据库原理"):
+    def generate_questions(self, question_type, chapters, count=1, course_name="通用课程"):
         """生成考试题目"""
         chapters_str = "、".join(chapters)
         
@@ -368,7 +368,7 @@ graph TD
         
         return self._make_request(prompt, max_tokens=3000)
     
-    def review_answers(self, questions_and_answers, knowledge_context="", course_name="数据库原理"):
+    def review_answers(self, questions_and_answers, knowledge_context="", course_name="通用课程"):
         """批改试卷答案"""
         # 根据课程类型调整语气风格
         course_style = self._get_course_style(course_name)
@@ -394,7 +394,7 @@ graph TD
 
         return self._make_request(prompt, max_tokens=3000)
     
-    def get_learning_advice(self, weak_points, chapter_context="", course_name="数据库原理"):
+    def get_learning_advice(self, weak_points, chapter_context="", course_name="通用课程"):
         """生成学习建议"""
         # 根据课程类型调整语气风格
         course_style = self._get_course_style(course_name)
@@ -418,7 +418,7 @@ graph TD
 
         return self._make_request(prompt)
 
-    def batch_generate_explanations(self, chapter_concepts, progress_callback=None, course_name="数据库原理"):
+    def batch_generate_explanations(self, chapter_concepts, progress_callback=None, course_name="通用课程"):
         """批量生成讲解"""
         results = {}
         total = len(chapter_concepts)
