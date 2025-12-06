@@ -60,11 +60,30 @@ class SettingsService:
             from datetime import datetime
             settings['updated_at'] = datetime.utcnow().isoformat()
             
-            with open(self.SETTINGS_FILE, 'w', encoding='utf-8') as f:
+            # 原子写入：先写入临时文件，再重命名
+            temp_file = f"{self.SETTINGS_FILE}.tmp"
+            with open(temp_file, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, ensure_ascii=False, indent=2)
+            
+            # Windows下重命名需要先删除目标文件
+            if os.path.exists(self.SETTINGS_FILE):
+                try:
+                    os.replace(temp_file, self.SETTINGS_FILE)
+                except OSError:
+                    # 如果replace失败（如文件被占用），尝试删除后重命名
+                    os.remove(self.SETTINGS_FILE)
+                    os.rename(temp_file, self.SETTINGS_FILE)
+            else:
+                os.rename(temp_file, self.SETTINGS_FILE)
+                
             return True
         except Exception as e:
             current_app.logger.error(f"保存设置失败: {e}")
+            if os.path.exists(f"{self.SETTINGS_FILE}.tmp"):
+                try:
+                    os.remove(f"{self.SETTINGS_FILE}.tmp")
+                except:
+                    pass
             return False
     
     def get_default_settings(self):
@@ -80,25 +99,29 @@ class SettingsService:
     def get_available_models(self):
         """获取可用的Ollama模型"""
         try:
-            result = subprocess.run(['ollama', 'list'], 
-                                  capture_output=True, text=True, timeout=10)
-            if result.returncode == 0:
-                models = []
-                lines = result.stdout.strip().split('\n')[1:]  # 跳过标题行
-                for line in lines:
-                    if line.strip():
-                        # 解析模型名称（第一列）
-                        parts = line.split()
-                        if parts:
-                            model_name = parts[0]
-                            models.append(model_name)
-                return models
-            else:
-                current_app.logger.error(f"获取模型列表失败: {result.stderr}")
-                return []
-        except subprocess.TimeoutExpired:
-            current_app.logger.error("获取模型列表超时")
+            # 尝试从配置获取API URL，如果失败则使用默认值
+            settings = self.load_settings()
+            api_url = settings.get('ollama_api_url', 'http://127.0.0.1:11434/api/chat')
+            
+            # 构造tags API URL (假设API URL是 /api/chat，我们需要 /api/tags)
+            base_url = api_url.replace('/api/chat', '')
+            tags_url = f"{base_url}/api/tags"
+            
+            try:
+                response = requests.get(tags_url, timeout=5)
+                if response.status_code == 200:
+                    data = response.json()
+                    models = []
+                    if 'models' in data:
+                        for model in data['models']:
+                            models.append(model['name'])
+                    return models
+            except Exception as e:
+                current_app.logger.warning(f"通过API获取模型失败: {e}")
+            
+            # 如果API失败，尝试使用默认列表或返回空
             return []
+            
         except Exception as e:
             current_app.logger.error(f"获取模型列表异常: {e}")
             return []

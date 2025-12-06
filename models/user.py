@@ -2,21 +2,15 @@
 用户模型
 """
 from datetime import datetime, timezone
+from app import db
 
-# 延迟导入避免循环依赖
-def _get_db():
-    """获取数据库实例"""
-    from app import db
-    return db
-
-# 简化的User模型，直接继承db.Model
-class User:
+class User(db.Model):
     """用户模型"""
+    __tablename__ = 'users'
 
-    def __init__(self, id=None, username=None, created_at=None):
-        self.id = id
-        self.username = username
-        self.created_at = created_at or datetime.now(timezone.utc)
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -33,42 +27,28 @@ class User:
     def get_or_create(username):
         """获取或创建用户"""
         try:
-            # 使用sqlite3直接操作数据库，避免SQLAlchemy问题
-            import sqlite3
-            import os
-
-            # 获取数据库文件路径
-            db_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'database.db')
-
-            with sqlite3.connect(db_path) as conn:
-                cursor = conn.cursor()
-
-                # 查询用户
-                cursor.execute("SELECT id, username, created_at FROM users WHERE username = ?", (username,))
-                result = cursor.fetchone()
-
-                if result:
-                    # 用户存在，返回User对象
-                    return User(id=result[0], username=result[1], created_at=result[2])
-                else:
-                    # 用户不存在，创建新用户
-                    now = datetime.now(timezone.utc)
-                    cursor.execute(
-                        "INSERT INTO users (username, created_at) VALUES (?, ?)",
-                        (username, now)
-                    )
-                    conn.commit()
-
-                    # 获取新创建的用户ID
-                    user_id = cursor.lastrowid
-                    return User(id=user_id, username=username, created_at=now)
+            user = User.query.filter_by(username=username).first()
+            
+            if not user:
+                user = User(username=username)
+                db.session.add(user)
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    # 可能并发创建了，重试查询
+                    user = User.query.filter_by(username=username).first()
+                    if not user:
+                        raise e
+            
+            return user
 
         except Exception as e:
             print(f"User.get_or_create failed: {e}")
-            # 如果失败，返回简单的User实例
-            return User(id=1, username=username)
+            # 如果数据库操作彻底失败，返回一个临时对象（不保存到数据库）
+            # 注意：这可能会导致后续外键关联失败，但在极端情况下比崩溃好
+            return User(id=0, username=username)
 
-# 为了兼容现有代码，提供get_user_model函数
 def get_user_model():
     """获取User模型类"""
     return User

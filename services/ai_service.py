@@ -92,36 +92,31 @@ class AIService:
             content = re.sub(r'<style[^>]*>.*?</style>', '', content, flags=re.DOTALL | re.IGNORECASE)
 
             # 特别处理可能导致Python执行错误的内容
-            # 移除可能被误解为Python代码的内容
-            content = re.sub(r'(?<!```)\b(eval|exec|compile|__import__)\s*\(', r'\1_SAFE(', content)
+            # 移除可能被误解为Python代码的内容，但避开代码块
+            # 使用简单的替换策略，避免复杂的正则回溯
+            dangerous_keywords = ['eval', 'exec', 'compile', '__import__']
+            for keyword in dangerous_keywords:
+                # 简单的替换，不尝试解析上下文，安全第一
+                if f"{keyword}(" in content:
+                    content = content.replace(f"{keyword}(", f"{keyword}_SAFE(")
 
             # 清理Mermaid图表中可能有问题的中文节点名
             # 将中文节点名替换为安全的英文标识符
             def clean_mermaid_nodes(match):
                 mermaid_content = match.group(1)
 
-                # 不再替换中文节点，保持原有的可读性
-                # 只做基本的清理，确保语法正确
-
-                # 清理可能的问题字符
-                mermaid_content = mermaid_content.replace('"', '"').replace('"', '"')
-                mermaid_content = mermaid_content.replace(''', "'").replace(''', "'")
-
                 # 确保节点标签用引号包围（如果包含中文或特殊字符）
                 import re
 
                 # 处理方括号节点 [中文内容] -> ["中文内容"]
-                mermaid_content = re.sub(r'\[([^]]*[\u4e00-\u9fff][^]]*)\]', r'["\1"]', mermaid_content)
+                # 排除已经被引号包围的
+                mermaid_content = re.sub(r'\[(?!"|[\d\w\s]+\])([^]]*[\u4e00-\u9fff][^]]*)\]', r'["\1"]', mermaid_content)
 
                 # 处理花括号节点 {中文内容} -> {"中文内容"}
-                mermaid_content = re.sub(r'\{([^}]*[\u4e00-\u9fff][^}]*)\}', r'{"\1"}', mermaid_content)
+                mermaid_content = re.sub(r'\{(?!"|[\d\w\s]+\})([^}]*[\u4e00-\u9fff][^}]*)\}', r'{"\1"}', mermaid_content)
 
                 # 处理圆括号节点 (中文内容) -> ("中文内容")
-                mermaid_content = re.sub(r'\(([^)]*[\u4e00-\u9fff][^)]*)\)', r'("\1")', mermaid_content)
-
-                # 处理连接线上的标签 -- 中文 --> -> -- "中文" -->
-                mermaid_content = re.sub(r'--\s*([^-\s>]*[\u4e00-\u9fff][^-\s>]*)\s*-->', r'-- "\1" -->', mermaid_content)
-                mermaid_content = re.sub(r'\|\s*([^|]*[\u4e00-\u9fff][^|]*)\s*\|', r'|"\1"|', mermaid_content)
+                mermaid_content = re.sub(r'\((?!"|[\d\w\s]+\))([^)]*[\u4e00-\u9fff][^)]*)\)', r'("\1")', mermaid_content)
 
                 return f'```mermaid\n{mermaid_content}\n```'
 

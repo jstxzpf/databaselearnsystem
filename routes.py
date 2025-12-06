@@ -3,6 +3,7 @@
 """
 from flask import Blueprint, render_template, request, jsonify, session, send_file
 from services import LearningService, ExamService, ReviewService, SettingsService, CourseService
+from services.task_service import TaskService
 from datetime import datetime
 import os
 
@@ -16,6 +17,7 @@ exam_service = None
 review_service = None
 settings_service = None
 course_service = None
+task_service = None
 
 def get_learning_service():
     global learning_service
@@ -48,6 +50,12 @@ def get_course_service():
     if course_service is None:
         course_service = CourseService()
     return course_service
+
+def get_task_service():
+    global task_service
+    if task_service is None:
+        task_service = TaskService()
+    return task_service
 
 # ==================== 主页面路由 ====================
 
@@ -164,7 +172,7 @@ def explain_concept():
 
 @api_bp.route('/batch-explain-chapter', methods=['POST'])
 def batch_explain_chapter():
-    """批量生成章节讲解"""
+    """批量生成章节讲解 (异步)"""
     try:
         data = request.get_json()
         username = session.get('username', 'anonymous')
@@ -174,25 +182,59 @@ def batch_explain_chapter():
             return jsonify({'success': False, 'error': '章节参数不能为空'}), 400
 
         learning_service = get_learning_service()
+        task_service = get_task_service()
 
-        # 启动批量生成（这里简化处理，实际应该使用异步任务）
-        result = learning_service.batch_explain_chapter(username, chapter)
-        return jsonify(result)
+        # 提交异步任务
+        task_id = task_service.submit_task(
+            learning_service.batch_explain_chapter,
+            username, 
+            chapter
+        )
+        
+        return jsonify({
+            'success': True, 
+            'task_id': task_id,
+            'message': '批量生成任务已提交'
+        })
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @api_bp.route('/batch-explain-all', methods=['POST'])
 def batch_explain_all():
-    """批量生成全部讲解"""
+    """批量生成全部讲解 (异步)"""
     try:
         username = session.get('username', 'anonymous')
         learning_service = get_learning_service()
+        task_service = get_task_service()
 
-        # 启动批量生成（这里简化处理，实际应该使用异步任务）
-        result = learning_service.batch_explain_all(username)
-        return jsonify(result)
+        # 提交异步任务
+        task_id = task_service.submit_task(
+            learning_service.batch_explain_all,
+            username
+        )
+        
+        return jsonify({
+            'success': True, 
+            'task_id': task_id,
+            'message': '批量生成全部任务已提交'
+        })
 
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@api_bp.route('/tasks/<task_id>/status')
+def get_task_status(task_id):
+    """获取任务状态"""
+    try:
+        task_service = get_task_service()
+        task = task_service.get_task(task_id)
+        
+        if task:
+            return jsonify({'success': True, 'task': task})
+        else:
+            return jsonify({'success': False, 'error': '任务不存在'}), 404
+            
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
