@@ -21,7 +21,7 @@ class Config:
     
     # Ollama API配置
     OLLAMA_API_URL = os.environ.get('OLLAMA_API_URL') or 'http://127.0.0.1:11434/api/chat'
-    OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL') or 'qwen3:14b'
+    OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL') or 'qwen2.5:14b'
     
     # 数据文件路径
     KNOWLEDGE_BASE_FILE = 'kownlgebase.json'

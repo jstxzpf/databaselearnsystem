@@ -28,9 +28,7 @@ def get_learning_service():
 def get_exam_service():
     global exam_service
     if exam_service is None:
-        from flask import current_app
-        with current_app.app_context():
-            exam_service = ExamService()
+        exam_service = ExamService()
     return exam_service
 
 def get_review_service():
@@ -541,11 +539,12 @@ def health_check():
     try:
         # 检查基本服务状态
         from flask import current_app
+        from sqlalchemy import text
 
         # 检查数据库连接
-        from app import db
+        from extensions import db
         with db.engine.connect() as connection:
-            connection.execute(db.text('SELECT 1'))
+            connection.execute(text('SELECT 1'))
 
         # 检查必要文件
         required_files = [

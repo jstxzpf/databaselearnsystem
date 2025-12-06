@@ -9,7 +9,8 @@ from config import config
 import logging
 
 # 初始化扩展
-db = SQLAlchemy()
+# 初始化扩展
+from extensions import db
 
 def create_app(config_name=None):
     """应用工厂函数"""

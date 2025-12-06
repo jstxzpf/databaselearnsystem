@@ -1,7 +1,7 @@
 """
 数据库工具类
 """
-from app import db
+from extensions import db
 from models import User, LearningRecord, ExamRecord, ReviewRecord
 
 def init_database():

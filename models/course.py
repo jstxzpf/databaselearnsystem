@@ -4,7 +4,7 @@
 import os
 import json
 import glob
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import current_app
 
 class Course:
@@ -14,7 +14,7 @@ class Course:
         self.name = name
         self.description = description
         self.filename = filename
-        self.created_at = created_at or datetime.utcnow()
+        self.created_at = created_at or datetime.now(timezone.utc)
     
     def __repr__(self):
         return f'<Course {self.name}>'
@@ -39,7 +39,7 @@ class Course:
                 name='数据库原理',
                 description='数据库系统基础理论与应用',
                 filename='kownlgebase.json',
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             ))
         
         # 扫描其他课程文件
@@ -53,7 +53,7 @@ class Course:
                         name=course_name,
                         description=f'{course_name}课程',
                         filename=file_path,
-                        created_at=datetime.utcnow()
+                        created_at=datetime.now(timezone.utc)
                     ))
             except Exception as e:
                 print(f"加载课程文件 {file_path} 失败: {e}")
@@ -93,7 +93,7 @@ class Course:
                 name=name,
                 description=description,
                 filename=filename,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
         except Exception as e:
             raise Exception(f"创建课程失败: {str(e)}")
@@ -139,5 +139,5 @@ class Course:
             name='数据库原理',
             description='数据库系统基础理论与应用',
             filename='kownlgebase.json',
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )

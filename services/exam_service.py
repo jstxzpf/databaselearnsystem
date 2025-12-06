@@ -8,7 +8,7 @@ from models.exam import ExamModel
 from models.records import ExamRecord
 from models.user import User
 from services.ai_service import AIService
-from app import db
+from extensions import db
 from flask import current_app
 
 class ExamService:
@@ -23,7 +23,6 @@ class ExamService:
         try:
             # 确保在应用上下文中运行
             from flask import current_app
-            from app import db
 
             # 获取或创建用户（使用简化的User模型）
             from models.user import User

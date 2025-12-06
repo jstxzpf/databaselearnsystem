@@ -2,7 +2,7 @@
 用户模型
 """
 from datetime import datetime, timezone
-from app import db
+from extensions import db
 
 class User(db.Model):
     """用户模型"""
@@ -26,6 +26,9 @@ class User(db.Model):
     @staticmethod
     def get_or_create(username):
         """获取或创建用户"""
+        # 在函数内部导入db,确保使用已绑定到当前app的db实例
+        from extensions import db
+        
         try:
             user = User.query.filter_by(username=username).first()
             
@@ -44,10 +47,10 @@ class User(db.Model):
             return user
 
         except Exception as e:
-            print(f"User.get_or_create failed: {e}")
-            # 如果数据库操作彻底失败，返回一个临时对象（不保存到数据库）
-            # 注意：这可能会导致后续外键关联失败，但在极端情况下比崩溃好
-            return User(id=0, username=username)
+            from flask import current_app
+            current_app.logger.error(f"User.get_or_create failed: {e}")
+            # 不返回临时对象,而是抛出异常让调用者处理
+            raise
 
 def get_user_model():
     """获取User模型类"""

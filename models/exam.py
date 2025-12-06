@@ -3,7 +3,7 @@
 """
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import current_app
 
 class ExamModel:
@@ -69,7 +69,7 @@ class ExamModel:
         
         exam_paper = {
             'id': str(uuid.uuid4()),
-            'created_at': datetime.utcnow().isoformat(),
+            'created_at': datetime.now(timezone.utc).isoformat(),
             'chapters': selected_chapters,
             'question_types': selected_types,
             'questions': []

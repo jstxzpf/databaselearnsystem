@@ -9,7 +9,7 @@ from models.records import ReviewRecord
 from models.user import User
 from models.knowledge import KnowledgeBase
 from services.ai_service import AIService
-from app import db
+from extensions import db
 from flask import current_app
 
 class ReviewService:

@@ -1,8 +1,8 @@
 """
 记录模型 - 学习记录、考试记录、审批记录
 """
-from datetime import datetime
-from app import db
+from datetime import datetime, timezone
+from extensions import db
 
 class LearningRecord(db.Model):
     """学习记录模型"""
@@ -14,7 +14,7 @@ class LearningRecord(db.Model):
     concept = db.Column(db.String(200), nullable=False)
     concept_type = db.Column(db.String(20), nullable=False)  # 'concept' or 'content'
     explanation = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     def __repr__(self):
         return f'<LearningRecord {self.chapter}: {self.concept}>'
@@ -43,7 +43,7 @@ class ExamRecord(db.Model):
     questions = db.Column(db.Text)  # JSON格式存储题目
     score = db.Column(db.Integer)
     status = db.Column(db.String(20), default='generated')  # generated, completed
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     def __repr__(self):
         return f'<ExamRecord {self.exam_name}>'
@@ -74,7 +74,7 @@ class ReviewRecord(db.Model):
     suggestions = db.Column(db.Text)
     score = db.Column(db.Integer)
     status = db.Column(db.String(20), default='uploaded')  # uploaded, reviewed
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     
     def __repr__(self):
         return f'<ReviewRecord {self.original_filename}>'
