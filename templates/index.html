@@ -8,20 +8,27 @@
         <!-- 欢迎区域 - Hero Section -->
         <div class="hero-section text-center">
             <div class="hero-content container">
-                <h1 class="hero-title fade-in-up" style="animation-delay: 0.1s;">
-                    <i class="fas fa-graduation-cap me-3"></i>通用智能学习系统
-                </h1>
-                <p class="lead mb-4 fade-in-up" style="animation-delay: 0.2s; opacity: 0.9;">
-                    基于AI的智能多学科学习平台，打造沉浸式学习体验
-                </p>
-                <div class="fade-in-up" style="animation-delay: 0.3s;">
-                    <a class="btn btn-light btn-lg px-5 py-3 me-3" href="{{ url_for('main.learning_page') }}"
-                        role="button">
-                        <i class="fas fa-play me-2"></i>开始学习
-                    </a>
-                    <a class="btn btn-outline-light btn-lg px-5 py-3" href="#features" role="button">
-                        <i class="fas fa-star me-2"></i>了解更多
-                    </a>
+                <div class="row align-items-center">
+                    <div class="col-lg-6 text-lg-start">
+                        <h1 class="hero-title fade-in-up" style="animation-delay: 0.1s;">
+                            <i class="fas fa-graduation-cap me-3"></i>通用智能学习系统
+                        </h1>
+                        <p class="lead mb-4 fade-in-up" style="animation-delay: 0.2s; opacity: 0.9;">
+                            基于AI的智能多学科学习平台，打造沉浸式学习体验
+                        </p>
+                        <div class="fade-in-up" style="animation-delay: 0.3s;">
+                            <a class="btn btn-light btn-lg px-5 py-3 me-3" href="{{ url_for('main.learning_page') }}"
+                                role="button">
+                                <i class="fas fa-play me-2"></i>开始学习
+                            </a>
+                            <a class="btn btn-outline-light btn-lg px-5 py-3" href="#features" role="button">
+                                <i class="fas fa-star me-2"></i>了解更多
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 d-none d-lg-block fade-in-up" style="animation-delay: 0.4s;">
+                        <img src="{{ url_for('static', filename='img/hero_illustration.png') }}" alt="Hero Illustration" class="img-fluid" style="max-height: 350px;">
+                    </div>
                 </div>
             </div>
         </div>
@@ -34,10 +41,7 @@
         <div class="card h-100 fade-in-up" style="animation-delay: 0.4s;">
             <div class="card-body text-center">
                 <div class="mb-4">
-                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center"
-                        style="width: 80px; height: 80px;">
-                        <i class="fas fa-book fa-2x text-primary"></i>
-                    </div>
+                    <img src="{{ url_for('static', filename='img/icon_learning.png') }}" alt="智能学习" class="img-fluid" style="height: 100px;">
                 </div>
                 <h5 class="card-title mb-3">智能学习</h5>
                 <p class="card-text text-muted mb-4">
@@ -54,10 +58,7 @@
         <div class="card h-100 fade-in-up" style="animation-delay: 0.5s;">
             <div class="card-body text-center">
                 <div class="mb-4">
-                    <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center"
-                        style="width: 80px; height: 80px;">
-                        <i class="fas fa-edit fa-2x text-success"></i>
-                    </div>
+                    <img src="{{ url_for('static', filename='img/icon_exam.png') }}" alt="智能考试" class="img-fluid" style="height: 100px;">
                 </div>
                 <h5 class="card-title mb-3">智能考试</h5>
                 <p class="card-text text-muted mb-4">
@@ -74,10 +75,7 @@
         <div class="card h-100 fade-in-up" style="animation-delay: 0.6s;">
             <div class="card-body text-center">
                 <div class="mb-4">
-                    <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center"
-                        style="width: 80px; height: 80px;">
-                        <i class="fas fa-check-circle fa-2x text-warning"></i>
-                    </div>
+                    <img src="{{ url_for('static', filename='img/icon_review.png') }}" alt="智能阅卷" class="img-fluid" style="height: 100px;">
                 </div>
                 <h5 class="card-title mb-3">智能审批</h5>
                 <p class="card-text text-muted mb-4">
