@@ -3,75 +3,91 @@
 {% block title %}考试 - 通用智能学习系统{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row mb-4">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-edit me-2"></i>智能考试</h2>
-            <button class="btn btn-outline-secondary btn-sm" onclick="showExamHistory()">
-                <i class="fas fa-history me-1"></i>考试历史
+        <div class="d-flex justify-content-between align-items-center bg-white p-4 rounded-3 shadow-sm border-bottom">
+            <div>
+                <h2 class="fw-bold mb-1 text-primary"><i class="fas fa-edit me-2"></i>智能考试</h2>
+                <p class="text-muted mb-0 small">定制化考试生成与在线测试</p>
+            </div>
+            <button class="btn btn-outline-primary rounded-pill px-4" onclick="showExamHistory()">
+                <i class="fas fa-history me-1"></i>我的考试记录
             </button>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row g-4">
     <!-- 考试设置 -->
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="fas fa-cog me-2"></i>考试设置</h6>
+    <div class="col-lg-4">
+        <div class="card shadow-lg border-0 h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold text-uppercase text-muted small"><i class="fas fa-cog me-2"></i>配置参数</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <!-- 章节选择 -->
-                <div class="mb-3">
-                    <label class="form-label"><strong>选择章节</strong></label>
-                    <div class="form-check-container" style="max-height: 200px; overflow-y: auto;">
+                <div class="mb-4">
+                    <label class="form-label fw-bold small text-uppercase text-muted">考试范围 (章节)</label>
+                    <div class="form-check-container bg-light rounded-3 p-3 border-0"
+                        style="max-height: 250px; overflow-y: auto;">
                         {% for chapter in chapters %}
-                        <div class="form-check">
-                            <input class="form-check-input chapter-checkbox" type="checkbox" 
-                                   value="{{ chapter }}" id="chapter-{{ loop.index }}">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input chapter-checkbox" type="checkbox" value="{{ chapter }}"
+                                id="chapter-{{ loop.index }}">
                             <label class="form-check-label" for="chapter-{{ loop.index }}">
-                                <small>{{ chapter }}</small>
+                                {{ chapter }}
                             </label>
                         </div>
                         {% endfor %}
                     </div>
-                    <div class="mt-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAllChapters()">全选</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAllChapters()">清空</button>
+                    <div class="mt-2 d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-light text-primary fw-bold"
+                            onclick="selectAllChapters()">全选</button>
+                        <button type="button" class="btn btn-sm btn-light text-secondary fw-bold"
+                            onclick="clearAllChapters()">清空</button>
                     </div>
                 </div>
 
                 <!-- 题型选择 -->
-                <div class="mb-3">
-                    <label class="form-label"><strong>选择题型</strong></label>
-                    {% for qtype in question_types %}
-                    <div class="form-check">
-                        <input class="form-check-input qtype-checkbox" type="checkbox" 
-                               value="{{ qtype['题型名称'] }}" id="qtype-{{ loop.index }}" checked>
-                        <label class="form-check-label" for="qtype-{{ loop.index }}">
-                            {{ qtype['题型名称'] }} 
-                            <small class="text-muted">({{ qtype['题量'] }}题, {{ qtype['总分'] }}分)</small>
-                        </label>
+                <div class="mb-4">
+                    <label class="form-label fw-bold small text-uppercase text-muted">题型配置</label>
+                    <div class="bg-light rounded-3 p-3">
+                        {% for qtype in question_types %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input qtype-checkbox" type="checkbox" value="{{ qtype['题型名称'] }}"
+                                id="qtype-{{ loop.index }}" checked>
+                            <label class="form-check-label d-flex justify-content-between" for="qtype-{{ loop.index }}">
+                                <span>{{ qtype['题型名称'] }}</span>
+                                <span class="badge bg-white text-dark shadow-sm">{{ qtype['题量'] }}题 × {{ qtype['总分']
+                                    }}分</span>
+                            </label>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
 
                 <!-- AI生成选项 -->
-                <div class="mb-3">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="use-ai" checked>
-                        <label class="form-check-label" for="use-ai">
-                            <strong>使用AI生成题目</strong>
-                            <br><small class="text-muted">关闭后将生成基础试卷模板</small>
-                        </label>
+                <div class="mb-4">
+                    <div class="card bg-primary bg-opacity-10 border-0">
+                        <div class="card-body p-3">
+                            <div class="form-check form-switch mb-0">
+                                <input class="form-check-input" type="checkbox" id="use-ai" checked>
+                                <label class="form-check-label fw-bold text-primary" for="use-ai">
+                                    启用 AI 智能出题
+                                </label>
+                            </div>
+                            <div class="small text-muted mt-1 ps-1">
+                                开启后将由 AI 根据知识点动态生成题目，关闭则使用题库模版。
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- 操作按钮 -->
-                <div class="d-grid gap-2">
-                    <button type="button" class="btn btn-primary" onclick="generateExam()" id="generate-btn">
-                        <i class="fas fa-magic me-2"></i>生成试卷
+                <div class="d-grid">
+                    <button type="button" class="btn btn-primary btn-lg shadow-sm" onclick="generateExam()"
+                        id="generate-btn">
+                        <i class="fas fa-magic me-2"></i>立即生成试卷
                     </button>
                 </div>
             </div>
@@ -79,22 +95,25 @@
     </div>
 
     <!-- 试卷预览 -->
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>试卷预览</h6>
+    <div class="col-lg-8">
+        <div class="card shadow-lg border-0 h-100">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-uppercase text-muted small"><i class="fas fa-file-alt me-2"></i>试卷预览</h6>
                 <div>
-                    <button type="button" class="btn btn-sm btn-success" onclick="downloadExam()" 
-                            id="download-btn" style="display: none;">
+                    <button type="button" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm"
+                        onclick="downloadExam()" id="download-btn" style="display: none;">
                         <i class="fas fa-download me-1"></i>下载试卷
                     </button>
                 </div>
             </div>
-            <div class="card-body">
-                <div id="exam-preview">
-                    <div class="text-muted text-center">
-                        <i class="fas fa-file-alt fa-3x mb-3"></i>
-                        <p>选择章节和题型，然后点击"生成试卷"</p>
+            <div class="card-body p-4 bg-light bg-opacity-50">
+                <div id="exam-preview" class="h-100">
+                    <div class="text-muted text-center py-5 my-5">
+                        <div class="mb-4">
+                            <i class="fas fa-file-contract fa-4x text-muted opacity-25"></i>
+                        </div>
+                        <h5 class="fw-light">准备生成试卷</h5>
+                        <p class="small opacity-75">请在左侧配置考试参数，点击生成按钮开始</p>
                     </div>
                 </div>
             </div>
@@ -126,47 +145,47 @@
 
 {% block extra_js %}
 <script>
-let currentExamId = null;
+    let currentExamId = null;
 
-function selectAllChapters() {
-    $('.chapter-checkbox').prop('checked', true);
-}
-
-function clearAllChapters() {
-    $('.chapter-checkbox').prop('checked', false);
-}
-
-function generateExam() {
-    // 获取选中的章节
-    const selectedChapters = [];
-    $('.chapter-checkbox:checked').each(function() {
-        selectedChapters.push($(this).val());
-    });
-
-    if (selectedChapters.length === 0) {
-        showAlert('请至少选择一个章节', 'warning');
-        return;
+    function selectAllChapters() {
+        $('.chapter-checkbox').prop('checked', true);
     }
 
-    // 获取选中的题型
-    const selectedTypes = [];
-    $('.qtype-checkbox:checked').each(function() {
-        selectedTypes.push($(this).val());
-    });
-
-    if (selectedTypes.length === 0) {
-        showAlert('请至少选择一种题型', 'warning');
-        return;
+    function clearAllChapters() {
+        $('.chapter-checkbox').prop('checked', false);
     }
 
-    const useAI = $('#use-ai').is(':checked');
+    function generateExam() {
+        // 获取选中的章节
+        const selectedChapters = [];
+        $('.chapter-checkbox:checked').each(function () {
+            selectedChapters.push($(this).val());
+        });
 
-    // 显示加载状态
-    const generateBtn = $('#generate-btn');
-    const originalText = generateBtn.html();
-    generateBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>生成中...');
+        if (selectedChapters.length === 0) {
+            showAlert('请至少选择一个章节', 'warning');
+            return;
+        }
 
-    $('#exam-preview').html(`
+        // 获取选中的题型
+        const selectedTypes = [];
+        $('.qtype-checkbox:checked').each(function () {
+            selectedTypes.push($(this).val());
+        });
+
+        if (selectedTypes.length === 0) {
+            showAlert('请至少选择一种题型', 'warning');
+            return;
+        }
+
+        const useAI = $('#use-ai').is(':checked');
+
+        // 显示加载状态
+        const generateBtn = $('#generate-btn');
+        const originalText = generateBtn.html();
+        generateBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>生成中...');
+
+        $('#exam-preview').html(`
         <div class="text-center">
             <div class="spinner-border" role="status">
                 <span class="visually-hidden">生成中...</span>
@@ -175,206 +194,208 @@ function generateExam() {
         </div>
     `);
 
-    // 发送生成请求
-    $.ajax({
-        url: '/api/generate-exam',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            chapters: selectedChapters,
-            question_types: selectedTypes,
-            use_ai: useAI
+        // 发送生成请求
+        $.ajax({
+            url: '/api/generate-exam',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                chapters: selectedChapters,
+                question_types: selectedTypes,
+                use_ai: useAI
+            })
         })
-    })
-    .done(function(data) {
-        if (data.success) {
-            currentExamId = data.exam_id;
-            // 优先使用结构化数据渲染
-            displayExamPreview(data.exam_paper, data.formatted_paper);
-            $('#download-btn').show();
-            showAlert('试卷生成成功！', 'success');
-        } else {
-            showAlert('生成失败: ' + data.error, 'danger');
-        }
-    })
-    .fail(function(xhr) {
-        const error = xhr.responseJSON ? xhr.responseJSON.error : '网络错误';
-        showAlert('生成失败: ' + error, 'danger');
-    })
-    .always(function() {
-        generateBtn.prop('disabled', false).html(originalText);
-    });
-}
-
-function displayExamPreview(examPaper, formattedPaper) {
-    // 检查是否有生成的题目数据
-    if (!examPaper.generated_questions || examPaper.generated_questions.length === 0) {
-        // Fallback to text display if no structured data
-        renderTextPreview(formattedPaper);
-        return;
-    }
-
-    let html = '<div class="exam-paper-form">';
-    let questionNum = 1;
-
-    examPaper.questions.forEach((section, sectionIndex) => {
-        html += `<h5 class="mt-4 mb-3 border-bottom pb-2">${section.type_name} <small class="text-muted">(${section.count}题，共${section.total_score}分)</small></h5>`;
-        
-        // 获取该部分的题目列表
-        const questions = examPaper.generated_questions[sectionIndex];
-        
-        if (questions && questions.length > 0) {
-            questions.forEach((q, qIndex) => {
-                // 判断是结构化对象还是旧字符串
-                if (typeof q === 'string') {
-                    html += `
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h6 class="card-title">第${questionNum}题</h6>
-                                <p class="card-text" style="white-space: pre-wrap;">${q}</p>
-                            </div>
-                        </div>`;
+            .done(function (data) {
+                if (data.success) {
+                    currentExamId = data.exam_id;
+                    // 优先使用结构化数据渲染
+                    displayExamPreview(data.exam_paper, data.formatted_paper);
+                    $('#download-btn').show();
+                    showAlert('试卷生成成功！', 'success');
                 } else {
-                    // 结构化题目
-                    html += `
-                        <div class="card mb-3 shadow-sm">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <h6 class="card-title">第${questionNum}题</h6>
-                                    <button class="btn btn-sm btn-outline-info toggle-answer" data-target="#answer-${sectionIndex}-${qIndex}">
-                                        <i class="fas fa-eye me-1"></i>查看答案
-                                    </button>
-                                </div>
-                                <p class="card-text lead fs-6 mb-3">${q.content}</p>
-                                
-                                <div class="options-area mb-3">
-                                    ${renderOptions(q, sectionIndex, qIndex)}
-                                </div>
-
-                                <div class="collapse mt-3 bg-light p-3 rounded" id="answer-${sectionIndex}-${qIndex}">
-                                    <p class="mb-1"><strong>正确答案：</strong> <span class="text-success fw-bold">${q.answer || '无'}</span></p>
-                                    <p class="mb-0"><strong>解析：</strong> ${q.analysis || '暂无解析'}</p>
-                                </div>
-                            </div>
-                        </div>`;
+                    showAlert('生成失败: ' + data.error, 'danger');
                 }
-                questionNum++;
+            })
+            .fail(function (xhr) {
+                const error = xhr.responseJSON ? xhr.responseJSON.error : '网络错误';
+                showAlert('生成失败: ' + error, 'danger');
+            })
+            .always(function () {
+                generateBtn.prop('disabled', false).html(originalText);
             });
-        } else {
-            html += '<p class="text-muted">暂无题目</p>';
-        }
-    });
-
-    html += '</div>';
-    $('#exam-preview').html(html);
-
-    // 绑定显示答案事件
-    $('.toggle-answer').click(function() {
-        const targetId = $(this).data('target');
-        $(targetId).collapse('toggle');
-    });
-}
-
-function renderOptions(question, sectionIndex, questionIndex) {
-    if (!question.options || question.options.length === 0) {
-        // 主观题，显示文本框供输入
-        return `<textarea class="form-control" rows="3" placeholder="请输入你的答案..."></textarea>`;
     }
 
-    // 选择题，显示选项
-    let html = '<div class="list-group">';
-    question.options.forEach((opt, idx) => {
-        const optId = `opt-${sectionIndex}-${questionIndex}-${idx}`;
-        html += `
-            <label class="list-group-item list-group-item-action">
-                <input class="form-check-input me-1" type="radio" name="q-${sectionIndex}-${questionIndex}" value="${opt}" id="${optId}">
-                ${opt}
+    function displayExamPreview(examPaper, formattedPaper) {
+        // 检查是否有生成的题目数据
+        if (!examPaper.generated_questions || examPaper.generated_questions.length === 0) {
+            // Fallback to text display if no structured data
+            renderTextPreview(formattedPaper);
+            return;
+        }
+
+        let html = '<div class="exam-paper-form">';
+        let questionNum = 1;
+
+        examPaper.questions.forEach((section, sectionIndex) => {
+            html += `<h5 class="mt-4 mb-3 pb-2 border-bottom fw-bold text-primary">${section.type_name} <small class="text-muted fw-normal ms-2">(${section.count}题，共${section.total_score}分)</small></h5>`;
+
+            // 获取该部分的题目列表
+            const questions = examPaper.generated_questions[sectionIndex];
+
+            if (questions && questions.length > 0) {
+                questions.forEach((q, qIndex) => {
+                    // 判断是结构化对象还是旧字符串
+                    if (typeof q === 'string') {
+                        html += `
+                            <div class="card mb-3 border-0 shadow-sm">
+                                <div class="card-body p-4">
+                                    <h6 class="card-title fw-bold text-muted small text-uppercase mb-3">第${questionNum}题</h6>
+                                    <p class="card-text form-text-main" style="white-space: pre-wrap;">${q}</p>
+                                </div>
+                            </div>`;
+                    } else {
+                        // 结构化题目
+                        html += `
+                            <div class="card mb-3 border-0 shadow-sm question-card">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between mb-3">
+                                        <h6 class="card-title fw-bold text-muted small text-uppercase">第${questionNum}题</h6>
+                                        <button class="btn btn-sm btn-light text-primary fw-bold toggle-answer" data-target="#answer-${sectionIndex}-${qIndex}">
+                                            <i class="fas fa-eye me-1"></i>查看答案
+                                        </button>
+                                    </div>
+                                    <p class="card-text fs-6 mb-4 fw-medium">${q.content}</p>
+                                    
+                                    <div class="options-area mb-3">
+                                        ${renderOptions(q, sectionIndex, qIndex)}
+                                    </div>
+
+                                    <div class="collapse mt-3" id="answer-${sectionIndex}-${qIndex}">
+                                        <div class="p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25">
+                                            <p class="mb-2"><strong>正确答案：</strong> <span class="text-success fw-bold">${q.answer || '无'}</span></p>
+                                            <p class="mb-0 text-muted small"><strong>解析：</strong> ${q.analysis || '暂无解析'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }
+                    questionNum++;
+                });
+            } else {
+                html += '<div class="alert alert-light text-center text-muted">本题型暂无题目</div>';
+            }
+        });
+
+        html += '</div>';
+        $('#exam-preview').html(html);
+
+        // 绑定显示答案事件
+        $('.toggle-answer').click(function () {
+            const targetId = $(this).data('target');
+            $(targetId).collapse('toggle');
+        });
+    }
+
+    function renderOptions(question, sectionIndex, questionIndex) {
+        if (!question.options || question.options.length === 0) {
+            // 主观题，显示文本框供输入
+            return `<textarea class="form-control" rows="3" placeholder="请输入你的答案..."></textarea>`;
+        }
+
+        // 选择题，显示选项
+        let html = '<div class="list-group gap-2">';
+        question.options.forEach((opt, idx) => {
+            const optId = `opt-${sectionIndex}-${questionIndex}-${idx}`;
+            html += `
+            <label class="list-group-item list-group-item-action border-0 rounded-3 shadow-sm bg-light">
+                <input class="form-check-input me-2" type="radio" name="q-${sectionIndex}-${questionIndex}" value="${opt}" id="${optId}">
+                <span class="align-middle">${opt}</span>
             </label>
         `;
-    });
-    html += '</div>';
-    return html;
-}
+        });
+        html += '</div>';
+        return html;
+    }
 
-function renderTextPreview(formattedPaper) {
-    $('#exam-preview').html(`
+    function renderTextPreview(formattedPaper) {
+        $('#exam-preview').html(`
         <div class="exam-paper">
             <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 14px;">${formattedPaper}</pre>
         </div>
     `);
-}
-
-function downloadExam() {
-    if (!currentExamId) {
-        showAlert('没有可下载的试卷', 'warning');
-        return;
     }
 
-    // 创建下载链接
-    const downloadUrl = `/api/download-exam/${currentExamId}`;
-    
-    // 显示下载状态
-    const downloadBtn = $('#download-btn');
-    const originalText = downloadBtn.html();
-    downloadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>准备下载...');
+    function downloadExam() {
+        if (!currentExamId) {
+            showAlert('没有可下载的试卷', 'warning');
+            return;
+        }
 
-    // 创建隐藏的下载链接
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = `exam_${currentExamId}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+        // 创建下载链接
+        const downloadUrl = `/api/download-exam/${currentExamId}`;
 
-    // 恢复按钮状态
-    setTimeout(() => {
-        downloadBtn.prop('disabled', false).html(originalText);
-        showAlert('试卷下载完成！', 'success');
-    }, 1000);
-}
+        // 显示下载状态
+        const downloadBtn = $('#download-btn');
+        const originalText = downloadBtn.html();
+        downloadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>准备下载...');
 
-function showExamHistory() {
-    $('#historyModal').modal('show');
-    
-    // 加载考试历史
-    $.get('/api/exam-history')
-        .done(function(data) {
-            if (data.success) {
-                displayExamHistory(data.history);
-            } else {
-                $('#history-content').html(`
+        // 创建隐藏的下载链接
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `exam_${currentExamId}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // 恢复按钮状态
+        setTimeout(() => {
+            downloadBtn.prop('disabled', false).html(originalText);
+            showAlert('试卷下载完成！', 'success');
+        }, 1000);
+    }
+
+    function showExamHistory() {
+        $('#historyModal').modal('show');
+
+        // 加载考试历史
+        $.get('/api/exam-history')
+            .done(function (data) {
+                if (data.success) {
+                    displayExamHistory(data.history);
+                } else {
+                    $('#history-content').html(`
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle me-2"></i>加载失败: ${data.error}
                     </div>
                 `);
-            }
-        })
-        .fail(function() {
-            $('#history-content').html(`
+                }
+            })
+            .fail(function () {
+                $('#history-content').html(`
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-triangle me-2"></i>网络错误，请稍后重试
                 </div>
             `);
-        });
-}
+            });
+    }
 
-function displayExamHistory(history) {
-    if (history.length === 0) {
-        $('#history-content').html(`
+    function displayExamHistory(history) {
+        if (history.length === 0) {
+            $('#history-content').html(`
             <div class="text-muted text-center">
                 <i class="fas fa-file-alt fa-3x mb-3"></i>
                 <p>暂无考试历史</p>
             </div>
         `);
-        return;
-    }
+            return;
+        }
 
-    let html = '<div class="list-group">';
-    history.forEach(exam => {
-        const chapters = JSON.parse(exam.chapters);
-        const date = new Date(exam.created_at).toLocaleString();
-        
-        html += `
+        let html = '<div class="list-group">';
+        history.forEach(exam => {
+            const chapters = JSON.parse(exam.chapters);
+            const date = new Date(exam.created_at).toLocaleString();
+
+            html += `
             <div class="list-group-item">
                 <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">${exam.exam_name}</h6>
@@ -389,31 +410,31 @@ function displayExamHistory(history) {
                 </small>
             </div>
         `;
-    });
-    html += '</div>';
-    
-    $('#history-content').html(html);
-}
+        });
+        html += '</div>';
 
-function showAlert(message, type) {
-    const alertHtml = `
+        $('#history-content').html(html);
+    }
+
+    function showAlert(message, type) {
+        const alertHtml = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'} me-2"></i>
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
-    
-    // 移除现有的alert
-    $('.alert').remove();
-    
-    // 添加新的alert到页面顶部
-    $('main').prepend(alertHtml);
-    
-    // 自动消失
-    setTimeout(() => {
-        $('.alert').fadeOut();
-    }, 5000);
-}
+
+        // 移除现有的alert
+        $('.alert').remove();
+
+        // 添加新的alert到页面顶部
+        $('main').prepend(alertHtml);
+
+        // 自动消失
+        setTimeout(() => {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
 </script>
 {% endblock %}

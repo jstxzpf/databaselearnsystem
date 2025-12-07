@@ -3,56 +3,66 @@
 {% block title %}审批 - 通用智能学习系统{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row mb-4">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-check-circle me-2"></i>智能审批</h2>
-            <button class="btn btn-outline-secondary btn-sm" onclick="showReviewHistory()">
+        <div class="bg-white p-4 rounded-3 shadow-sm border-bottom d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-primary mb-1"><i class="fas fa-check-circle me-2"></i>智能审批</h2>
+                <p class="text-muted mb-0">上传试卷，AI自动批改并生成详细反馈</p>
+            </div>
+            <button class="btn btn-outline-secondary shadow-sm" onclick="showReviewHistory()">
                 <i class="fas fa-history me-1"></i>审批历史
             </button>
         </div>
     </div>
 </div>
 
-<div class="row">
+<div class="row g-4">
     <!-- 文件上传区域 -->
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="fas fa-upload me-2"></i>上传试卷</h6>
+        <div class="card shadow-lg border-0 h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold text-uppercase text-muted small"><i class="fas fa-upload me-2"></i>上传试卷</h6>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form id="upload-form" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="exam-file" class="form-label">选择试卷文件</label>
-                        <input type="file" class="form-control" id="exam-file" 
-                               accept=".txt,.pdf,.doc,.docx" required>
-                        <div class="form-text">
-                            支持格式: TXT, PDF, DOC, DOCX (最大16MB)
+                    <div
+                        class="upload-area p-4 border-2 border-dashed rounded-3 text-center mb-4 bg-light bg-opacity-50">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3 opacity-50"></i>
+                        <div class="mb-3">
+                            <label for="exam-file" class="form-label fw-bold">选择试卷文件</label>
+                            <input type="file" class="form-control" id="exam-file" accept=".txt,.pdf,.doc,.docx"
+                                required>
+                            <div class="form-text mt-2 small text-muted">
+                                支持格式: TXT, PDF, DOC, DOCX<br>(最大16MB)
+                            </div>
                         </div>
                     </div>
-                    
+
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary" id="upload-btn">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm" id="upload-btn">
                             <i class="fas fa-upload me-2"></i>上传文件
                         </button>
                     </div>
                 </form>
-                
+
                 <!-- 上传状态 -->
-                <div id="upload-status" class="mt-3" style="display: none;"></div>
-                
+                <div id="upload-status" class="mt-4" style="display: none;"></div>
+
                 <!-- 文件信息 -->
-                <div id="file-info" class="mt-3" style="display: none;">
-                    <div class="card bg-light">
+                <div id="file-info" class="mt-4" style="display: none;">
+                    <div class="card bg-primary bg-opacity-10 border-0">
                         <div class="card-body">
-                            <h6 class="card-title">
+                            <h6 class="card-title fw-bold text-primary mb-3">
                                 <i class="fas fa-file-alt me-2"></i>已上传文件
                             </h6>
-                            <p class="card-text" id="file-name"></p>
-                            <button type="button" class="btn btn-success btn-sm" onclick="startReview()" id="review-btn">
-                                <i class="fas fa-magic me-1"></i>开始审批
-                            </button>
+                            <p class="card-text fw-medium mb-3" id="file-name"></p>
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-success shadow-sm" onclick="startReview()"
+                                    id="review-btn">
+                                    <i class="fas fa-magic me-1"></i>开始智能审批
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -62,15 +72,18 @@
 
     <!-- 试卷内容预览 -->
     <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>试卷内容</h6>
+        <div class="card shadow-lg border-0 h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold text-uppercase text-muted small"><i class="fas fa-file-alt me-2"></i>试卷内容</h6>
             </div>
-            <div class="card-body">
-                <div id="exam-content">
-                    <div class="text-muted text-center">
-                        <i class="fas fa-file-upload fa-3x mb-3"></i>
-                        <p>请先上传试卷文件</p>
+            <div class="card-body p-4 bg-light bg-opacity-50">
+                <div id="exam-content" class="h-100">
+                    <div class="text-muted text-center py-5 my-5">
+                        <div class="mb-4">
+                            <i class="fas fa-file-upload fa-4x text-muted opacity-25"></i>
+                        </div>
+                        <h5 class="fw-light">暂无内容</h5>
+                        <p class="small opacity-75">请先上传试卷文件以预览内容</p>
                     </div>
                 </div>
             </div>
@@ -81,20 +94,24 @@
 <div class="row mt-4">
     <div class="col-12">
         <!-- 审批结果 -->
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0"><i class="fas fa-robot me-2"></i>AI审批结果</h6>
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-uppercase text-muted small"><i class="fas fa-robot me-2"></i>AI审批结果</h6>
                 <div id="review-loading" style="display: none;">
-                    <div class="spinner-border spinner-border-sm" role="status">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
                         <span class="visually-hidden">审批中...</span>
                     </div>
+                    <span class="ms-2 text-primary small fw-bold">AI正在思考...</span>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div id="review-result">
-                    <div class="text-muted text-center">
-                        <i class="fas fa-robot fa-3x mb-3"></i>
-                        <p>上传试卷并开始审批后，AI将为您提供详细的批改结果和学习建议</p>
+                    <div class="text-muted text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-clipboard-check fa-4x text-muted opacity-25"></i>
+                        </div>
+                        <p class="lead">等待审批</p>
+                        <p class="small opacity-75">上传试卷并点击“开始智能审批”后，AI将为您提供详细的批改结果和学习建议</p>
                     </div>
                 </div>
             </div>
@@ -104,16 +121,16 @@
 
 <!-- 审批历史模态框 -->
 <div class="modal fade" id="historyModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">审批历史</h5>
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-white border-bottom">
+                <h5 class="modal-title fw-bold">审批历史</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body bg-light">
                 <div id="history-content">
-                    <div class="text-center">
-                        <div class="spinner-border" role="status">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">加载中...</span>
                         </div>
                     </div>
@@ -126,305 +143,323 @@
 
 {% block extra_js %}
 <script>
-let currentRecordId = null;
+    let currentRecordId = null;
 
-$(document).ready(function() {
-    // 文件上传表单提交
-    $('#upload-form').submit(function(e) {
-        e.preventDefault();
-        uploadFile();
-    });
-    
-    // 文件选择变化
-    $('#exam-file').change(function() {
-        const file = this.files[0];
-        if (file) {
-            // 检查文件大小
-            if (file.size > 16 * 1024 * 1024) {
-                showAlert('文件大小不能超过16MB', 'warning');
-                this.value = '';
-                return;
-            }
-            
-            // 检查文件类型
-            const allowedTypes = ['.txt', '.pdf', '.doc', '.docx'];
-            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
-            if (!allowedTypes.includes(fileExt)) {
-                showAlert('不支持的文件类型，请选择TXT、PDF、DOC或DOCX文件', 'warning');
-                this.value = '';
-                return;
-            }
-        }
-    });
-});
-
-function uploadFile() {
-    const fileInput = $('#exam-file')[0];
-    const file = fileInput.files[0];
-    
-    if (!file) {
-        showAlert('请选择文件', 'warning');
-        return;
-    }
-    
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    // 显示上传状态
-    const uploadBtn = $('#upload-btn');
-    const originalText = uploadBtn.html();
-    uploadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>上传中...');
-    
-    $('#upload-status').show().html(`
-        <div class="progress">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                 role="progressbar" style="width: 100%">上传中...</div>
-        </div>
-    `);
-    
-    // 发送上传请求
-    $.ajax({
-        url: '/api/upload-exam',
-        method: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false
-    })
-    .done(function(data) {
-        if (data.success) {
-            currentRecordId = data.record_id;
-            showFileInfo(data.original_filename);
-            parseExamFile(data.record_id);
-            showAlert('文件上传成功！', 'success');
-        } else {
-            showAlert('上传失败: ' + data.error, 'danger');
-        }
-    })
-    .fail(function(xhr) {
-        const error = xhr.responseJSON ? xhr.responseJSON.error : '网络错误';
-        showAlert('上传失败: ' + error, 'danger');
-    })
-    .always(function() {
-        uploadBtn.prop('disabled', false).html(originalText);
-        $('#upload-status').hide();
-    });
-}
-
-function showFileInfo(filename) {
-    $('#file-name').text(filename);
-    $('#file-info').show();
-}
-
-function parseExamFile(recordId) {
-    $.get(`/api/parse-exam/${recordId}`)
-        .done(function(data) {
-            if (data.success) {
-                displayExamContent(data.content, data.parsed_content);
-            } else {
-                showAlert('解析文件失败: ' + data.error, 'warning');
-            }
-        })
-        .fail(function() {
-            showAlert('解析文件失败，请稍后重试', 'warning');
+    $(document).ready(function () {
+        // 文件上传表单提交
+        $('#upload-form').submit(function (e) {
+            e.preventDefault();
+            uploadFile();
         });
-}
 
-function displayExamContent(content, parsedContent) {
-    let html = `
-        <div class="mb-3">
-            <h6>文件内容预览</h6>
-            <div class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;">
-                <pre style="white-space: pre-wrap; font-size: 14px;">${content.substring(0, 2000)}</pre>
-                ${content.length > 2000 ? '<p class="text-muted">... (内容已截断)</p>' : ''}
+        // 文件选择变化
+        $('#exam-file').change(function () {
+            const file = this.files[0];
+            if (file) {
+                // 检查文件大小
+                if (file.size > 16 * 1024 * 1024) {
+                    showAlert('文件大小不能超过16MB', 'warning');
+                    this.value = '';
+                    return;
+                }
+
+                // 检查文件类型
+                const allowedTypes = ['.txt', '.pdf', '.doc', '.docx'];
+                const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+                if (!allowedTypes.includes(fileExt)) {
+                    showAlert('不支持的文件类型，请选择TXT、PDF、DOC或DOCX文件', 'warning');
+                    this.value = '';
+                    return;
+                }
+            }
+        });
+    });
+
+    function uploadFile() {
+        const fileInput = $('#exam-file')[0];
+        const file = fileInput.files[0];
+
+        if (!file) {
+            showAlert('请选择文件', 'warning');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // 显示上传状态
+        const uploadBtn = $('#upload-btn');
+        const originalText = uploadBtn.html();
+        uploadBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>上传中...');
+
+        $('#upload-status').show().html(`
+        <div class="progress" style="height: 10px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                 role="progressbar" style="width: 100%"></div>
+        </div>
+        <p class="text-center small text-muted mt-2">正在上传文件...</p>
+    `);
+
+        // 发送上传请求
+        $.ajax({
+            url: '/api/upload-exam',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false
+        })
+            .done(function (data) {
+                if (data.success) {
+                    currentRecordId = data.record_id;
+                    showFileInfo(data.original_filename);
+                    parseExamFile(data.record_id);
+                    showAlert('文件上传成功！', 'success');
+                } else {
+                    showAlert('上传失败: ' + data.error, 'danger');
+                }
+            })
+            .fail(function (xhr) {
+                const error = xhr.responseJSON ? xhr.responseJSON.error : '网络错误';
+                showAlert('上传失败: ' + error, 'danger');
+            })
+            .always(function () {
+                uploadBtn.prop('disabled', false).html(originalText);
+                $('#upload-status').hide();
+            });
+    }
+
+    function showFileInfo(filename) {
+        $('#file-name').text(filename);
+        $('#file-info').fadeIn();
+    }
+
+    function parseExamFile(recordId) {
+        $.get(`/api/parse-exam/${recordId}`)
+            .done(function (data) {
+                if (data.success) {
+                    displayExamContent(data.content, data.parsed_content);
+                } else {
+                    showAlert('解析文件失败: ' + data.error, 'warning');
+                }
+            })
+            .fail(function () {
+                showAlert('解析文件失败，请稍后重试', 'warning');
+            });
+    }
+
+    function displayExamContent(content, parsedContent) {
+        let html = `
+        <div class="mb-4">
+            <h6 class="fw-bold mb-3 text-secondary">文件内容预览</h6>
+            <div class="bg-white p-4 rounded-3 border shadow-sm" style="max-height: 400px; overflow-y: auto;">
+                <pre class="mb-0 text-secondary" style="white-space: pre-wrap; font-size: 14px; font-family: 'Courier New', monospace;">${content.substring(0, 2000)}</pre>
+                ${content.length > 2000 ? '<p class="text-muted mt-2 text-center small fst-italic">... (内容已截断)</p>' : ''}
             </div>
         </div>
     `;
-    
-    if (parsedContent && parsedContent.total_questions > 0) {
-        html += `
-            <div class="mb-3">
-                <h6>解析结果</h6>
-                <p class="text-muted">检测到 ${parsedContent.total_questions} 道题目</p>
+
+        if (parsedContent && parsedContent.total_questions > 0) {
+            html += `
+            <div class="alert alert-info border-0 shadow-sm d-flex align-items-center">
+                <i class="fas fa-info-circle fa-lg me-3 text-info"></i>
+                <div>
+                    <h6 class="alert-heading fw-bold mb-1">解析成功</h6>
+                    <p class="mb-0 small">系统成功检测到 <strong>${parsedContent.total_questions}</strong> 道题目，随时可以开始审批。</p>
+                </div>
             </div>
         `;
-    }
-    
-    $('#exam-content').html(html);
-}
+        }
 
-function startReview() {
-    if (!currentRecordId) {
-        showAlert('请先上传文件', 'warning');
-        return;
+        $('#exam-content').html(html);
     }
-    
-    // 显示审批状态
-    const reviewBtn = $('#review-btn');
-    const originalText = reviewBtn.html();
-    reviewBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>审批中...');
-    
-    $('#review-loading').show();
-    $('#review-result').html(`
-        <div class="text-center">
-            <div class="spinner-border" role="status">
+
+    function startReview() {
+        if (!currentRecordId) {
+            showAlert('请先上传文件', 'warning');
+            return;
+        }
+
+        // 显示审批状态
+        const reviewBtn = $('#review-btn');
+        const originalText = reviewBtn.html();
+        reviewBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>审批中...');
+
+        $('#review-loading').show();
+        $('#review-result').html(`
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
                 <span class="visually-hidden">AI正在审批试卷...</span>
             </div>
-            <p class="mt-2">AI正在仔细审批您的试卷，请稍候...</p>
-            <small class="text-muted">这可能需要几分钟时间</small>
+            <h5 class="mt-4 fw-light">AI正在深度分析试卷</h5>
+            <p class="text-muted mb-0">正在评估答案准确性、生成解析和学习建议...</p>
+            <p class="small text-muted mt-2">这可能需要 1-2 分钟，请耐心等待</p>
         </div>
     `);
-    
-    // 发送审批请求
-    $.ajax({
-        url: '/api/review-exam',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            record_id: currentRecordId
-        })
-    })
-    .done(function(data) {
-        if (data.success) {
-            displayReviewResult(data);
-            showAlert('审批完成！', 'success');
-        } else {
-            showAlert('审批失败: ' + data.error, 'danger');
-        }
-    })
-    .fail(function(xhr) {
-        const error = xhr.responseJSON ? xhr.responseJSON.error : '网络错误';
-        showAlert('审批失败: ' + error, 'danger');
-    })
-    .always(function() {
-        reviewBtn.prop('disabled', false).html(originalText);
-        $('#review-loading').hide();
-    });
-}
 
-function displayReviewResult(data) {
-    let html = `
-        <div class="row">
+        // 发送审批请求
+        $.ajax({
+            url: '/api/review-exam',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                record_id: currentRecordId
+            })
+        })
+            .done(function (data) {
+                if (data.success) {
+                    displayReviewResult(data);
+                    showAlert('审批完成！', 'success');
+                } else {
+                    showAlert('审批失败: ' + data.error, 'danger');
+                }
+            })
+            .fail(function (xhr) {
+                const error = xhr.responseJSON ? xhr.responseJSON.error : '网络错误';
+                showAlert('审批失败: ' + error, 'danger');
+            })
+            .always(function () {
+                reviewBtn.prop('disabled', false).html(originalText);
+                $('#review-loading').hide();
+            });
+    }
+
+    function displayReviewResult(data) {
+        let html = `
+        <div class="row g-4">
             <div class="col-md-6">
-                <h6><i class="fas fa-clipboard-check me-2"></i>批改结果</h6>
-                <div class="bg-light p-3 rounded mb-3">
-                    <pre style="white-space: pre-wrap; font-size: 14px;">${data.review_result}</pre>
+                <div class="h-100 p-4 bg-light rounded-3 border shadow-sm">
+                    <h6 class="fw-bold text-success mb-3"><i class="fas fa-clipboard-check me-2"></i>批改结果</h6>
+                    <div class="bg-white p-3 rounded-2 border">
+                        <pre style="white-space: pre-wrap; font-size: 14px; color: #333;">${data.review_result}</pre>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <h6><i class="fas fa-lightbulb me-2"></i>学习建议</h6>
-                <div class="bg-light p-3 rounded mb-3">
-                    <pre style="white-space: pre-wrap; font-size: 14px;">${data.suggestions || '暂无具体建议'}</pre>
+                <div class="h-100 p-4 bg-light rounded-3 border shadow-sm">
+                    <h6 class="fw-bold text-primary mb-3"><i class="fas fa-lightbulb me-2"></i>学习建议</h6>
+                    <div class="bg-white p-3 rounded-2 border">
+                        <pre style="white-space: pre-wrap; font-size: 14px; color: #333;">${data.suggestions || '暂无具体建议'}</pre>
+                    </div>
                 </div>
             </div>
         </div>
     `;
-    
-    if (data.score) {
-        html = `
-            <div class="alert alert-info mb-3">
-                <h5 class="alert-heading">
-                    <i class="fas fa-star me-2"></i>总体评分: ${data.score}分
-                </h5>
+
+        if (data.score) {
+            html = `
+            <div class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4">
+                <div class="display-4 fw-bold me-4 text-success">${data.score}<span class="fs-4">分</span></div>
+                <div class="border-start ps-4">
+                    <h5 class="alert-heading fw-bold mb-1">本次得分</h5>
+                    <p class="mb-0 small opacity-75">根据上传试卷的完成情况自动评估</p>
+                </div>
             </div>
         ` + html;
-    }
-    
-    if (data.weak_points && data.weak_points.length > 0) {
-        html += `
-            <div class="mt-3">
-                <h6><i class="fas fa-exclamation-triangle me-2"></i>需要改进的地方</h6>
-                <ul class="list-group">
+        }
+
+        if (data.weak_points && data.weak_points.length > 0) {
+            html += `
+            <div class="mt-4">
+                <h6 class="fw-bold text-danger mb-3"><i class="fas fa-exclamation-triangle me-2"></i>需重点突破的知识点</h6>
+                <div class="list-group shadow-sm">
         `;
-        data.weak_points.forEach(point => {
-            html += `<li class="list-group-item">${point}</li>`;
-        });
-        html += `
-                </ul>
+            data.weak_points.forEach(point => {
+                html += `<div class="list-group-item list-group-item-action border-0 px-4 py-3">
+                        <i class="fas fa-dot-circle text-danger me-2 small"></i>${point}
+                     </div>`;
+            });
+            html += `
+                </div>
             </div>
         `;
-    }
-    
-    $('#review-result').html(html);
-}
+        }
 
-function showReviewHistory() {
-    $('#historyModal').modal('show');
-    
-    // 加载审批历史
-    $.get('/api/review-history')
-        .done(function(data) {
-            if (data.success) {
-                displayReviewHistory(data.history);
-            } else {
-                $('#history-content').html(`
-                    <div class="alert alert-danger">
+        $('#review-result').html(html);
+    }
+
+    function showReviewHistory() {
+        $('#historyModal').modal('show');
+
+        // 加载审批历史
+        $.get('/api/review-history')
+            .done(function (data) {
+                if (data.success) {
+                    displayReviewHistory(data.history);
+                } else {
+                    $('#history-content').html(`
+                    <div class="alert alert-danger shadow-sm border-0">
                         <i class="fas fa-exclamation-triangle me-2"></i>加载失败: ${data.error}
                     </div>
                 `);
-            }
-        })
-        .fail(function() {
-            $('#history-content').html(`
-                <div class="alert alert-danger">
+                }
+            })
+            .fail(function () {
+                $('#history-content').html(`
+                <div class="alert alert-danger shadow-sm border-0">
                     <i class="fas fa-exclamation-triangle me-2"></i>网络错误，请稍后重试
                 </div>
             `);
-        });
-}
+            });
+    }
 
-function displayReviewHistory(history) {
-    if (history.length === 0) {
-        $('#history-content').html(`
-            <div class="text-muted text-center">
-                <i class="fas fa-file-alt fa-3x mb-3"></i>
+    function displayReviewHistory(history) {
+        if (history.length === 0) {
+            $('#history-content').html(`
+            <div class="text-muted text-center py-5">
+                <i class="fas fa-file-alt fa-3x mb-3 opacity-25"></i>
                 <p>暂无审批历史</p>
             </div>
         `);
-        return;
-    }
+            return;
+        }
 
-    let html = '<div class="list-group">';
-    history.forEach(record => {
-        const date = new Date(record.created_at).toLocaleString();
-        
-        html += `
-            <div class="list-group-item">
-                <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">${record.original_filename}</h6>
+        let html = '<div class="list-group gap-2">';
+        history.forEach(record => {
+            const date = new Date(record.created_at).toLocaleString();
+            const scoreBadge = record.score ? `<span class="badge bg-success rounded-pill ms-2">${record.score}分</span>` : '';
+            const statusBadge = record.status === 'reviewed'
+                ? '<span class="badge bg-primary rounded-pill">已审批</span>'
+                : '<span class="badge bg-secondary rounded-pill">已上传</span>';
+
+            html += `
+            <div class="list-group-item list-group-item-action border-0 shadow-sm rounded-3 p-3">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0 fw-bold text-primary">${record.original_filename}</h6>
                     <small class="text-muted">${date}</small>
                 </div>
-                <p class="mb-1">
-                    状态: ${record.status === 'reviewed' ? '已审批' : '已上传'}
-                    ${record.score ? ` | 得分: ${record.score}分` : ''}
-                </p>
-                ${record.suggestions ? `<small class="text-muted">${record.suggestions.substring(0, 100)}...</small>` : ''}
+                <div class="mb-2">
+                    ${statusBadge}
+                    ${scoreBadge}
+                </div>
+                ${record.suggestions ? `<p class="mb-0 small text-muted text-truncate"><i class="fas fa-quote-left me-2"></i>${record.suggestions}</p>` : ''}
             </div>
         `;
-    });
-    html += '</div>';
-    
-    $('#history-content').html(html);
-}
+        });
+        html += '</div>';
 
-function showAlert(message, type) {
-    const alertHtml = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'} me-2"></i>
+        $('#history-content').html(html);
+    }
+
+    function showAlert(message, type) {
+        const icon = type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle';
+        const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show shadow-sm border-0" role="alert">
+            <i class="fas fa-${icon} me-2"></i>
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
-    
-    // 移除现有的alert
-    $('.alert').remove();
-    
-    // 添加新的alert到页面顶部
-    $('main').prepend(alertHtml);
-    
-    // 自动消失
-    setTimeout(() => {
-        $('.alert').fadeOut();
-    }, 5000);
-}
+
+        // 移除现有的alert
+        $('.alert').remove();
+
+        // 添加新的alert到页面顶部
+        $('main').prepend(alertHtml);
+
+        // 自动消失
+        setTimeout(() => {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
 </script>
 {% endblock %}
